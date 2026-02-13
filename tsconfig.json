@@ -1,0 +1,25 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compileOnSave": false,
+  "files": [],
+  "references": [
+    {
+      "path": "./gateway-e2e"
+    },
+    {
+      "path": "./gateway"
+    },
+    {
+      "path": "./auth-api-e2e"
+    },
+    {
+      "path": "./auth-api"
+    },
+    {
+      "path": "./skillbook-api-e2e"
+    },
+    {
+      "path": "./skillbook-api"
+    }
+  ]
+}

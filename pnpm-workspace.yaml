@@ -1,0 +1,8 @@
+packages:
+  - 'packages/*'
+  - 'gateway'
+  - 'gateway-e2e'
+  - 'auth-api'
+  - 'auth-api-e2e'
+  - 'skillbook-api'
+  - 'skillbook-api-e2e'
