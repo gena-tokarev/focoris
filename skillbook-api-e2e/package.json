@@ -1,10 +1,10 @@
 {
-  "name": "@org/skillbook-api-e2e",
+  "name": "@focoris/skillbook-api-e2e",
   "version": "0.0.1",
   "private": true,
   "nx": {
     "implicitDependencies": [
-      "@org/skillbook-api"
+      "@focoris/skillbook-api"
     ],
     "targets": {
       "e2e": {
@@ -17,8 +17,8 @@
           "passWithNoTests": true
         },
         "dependsOn": [
-          "@org/skillbook-api:build",
-          "@org/skillbook-api:serve"
+          "@focoris/skillbook-api:build",
+          "@focoris/skillbook-api:serve"
         ]
       }
     }

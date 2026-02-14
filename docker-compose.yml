@@ -1,0 +1,32 @@
+services:
+  auth-api:
+    build:
+      context: .
+      dockerfile: auth-api/Dockerfile
+    environment:
+      PORT: 3001
+    ports:
+      - "3001:3001"
+
+  skillbook-api:
+    build:
+      context: .
+      dockerfile: skillbook-api/Dockerfile
+    environment:
+      PORT: 3002
+    ports:
+      - "3002:3002"
+
+  gateway:
+    build:
+      context: .
+      dockerfile: gateway/Dockerfile
+    depends_on:
+      - auth-api
+      - skillbook-api
+    environment:
+      PORT: 3000
+      AUTH_API_URL: http://auth-api:3001
+      SKILL_BOOK_API_URL: http://skillbook-api:3002
+    ports:
+      - "3000:3000"

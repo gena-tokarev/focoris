@@ -1,23 +1,29 @@
 {
-  "name": "@org/skillbook-api",
+  "name": "@focoris/skillbook-api",
   "version": "0.0.1",
   "private": true,
   "nx": {
     "targets": {
       "build": {
-        "executor": "nx:run-commands",
+        "executor": "@nx/webpack:webpack",
+        "outputs": [
+          "{options.outputPath}"
+        ],
         "options": {
-          "command": "webpack-cli build",
-          "args": [
-            "--node-env=production"
-          ],
-          "cwd": "skillbook-api"
+          "target": "node",
+          "compiler": "tsc",
+          "main": "skillbook-api/src/main.ts",
+          "tsConfig": "skillbook-api/tsconfig.app.json",
+          "webpackConfig": "skillbook-api/webpack.config.js",
+          "outputPath": "dist/skillbook-api"
         },
         "configurations": {
           "development": {
-            "args": [
-              "--node-env=development"
-            ]
+            "watch": true,
+            "sourceMap": true
+          },
+          "production": {
+            "optimization": true
           }
         }
       },
@@ -28,8 +34,8 @@
         "cache": true,
         "executor": "@nx/js:prune-lockfile",
         "outputs": [
-          "{workspaceRoot}/skillbook-api/dist/package.json",
-          "{workspaceRoot}/skillbook-api/dist/pnpm-lock.yaml"
+          "{workspaceRoot}/dist/skillbook-api/package.json",
+          "{workspaceRoot}/dist/skillbook-api/pnpm-lock.yaml"
         ],
         "options": {
           "buildTarget": "build"
@@ -41,7 +47,7 @@
         ],
         "cache": true,
         "outputs": [
-          "{workspaceRoot}/skillbook-api/dist/workspace_modules"
+          "{workspaceRoot}/dist/skillbook-api/workspace_modules"
         ],
         "executor": "@nx/js:copy-workspace-modules",
         "options": {
@@ -63,15 +69,21 @@
           "build"
         ],
         "options": {
-          "buildTarget": "@org/skillbook-api:build",
+          "buildTarget": "@focoris/skillbook-api:build",
           "runBuildTargetDependencies": false
         },
         "configurations": {
           "development": {
-            "buildTarget": "@org/skillbook-api:build:development"
+            "buildTarget": "@focoris/skillbook-api:build:development"
+          },
+          "debug": {
+            "buildTarget": "@focoris/skillbook-api:build:development",
+            "inspect": "inspect",
+            "host": "127.0.0.1",
+            "port": 9231
           },
           "production": {
-            "buildTarget": "@org/skillbook-api:build:production"
+            "buildTarget": "@focoris/skillbook-api:build:production"
           }
         }
       },
