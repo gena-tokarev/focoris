@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { ConfigService } from '@nestjs/config';
 import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { ProxyModule } from '../proxy/proxy.module';
+import { ProxyService } from '../proxy/proxy.service';
 
 describe('AppController', () => {
   let app: TestingModule;
@@ -9,7 +9,23 @@ describe('AppController', () => {
   beforeAll(async () => {
     app = await Test.createTestingModule({
       controllers: [AppController],
-      providers: [AppService, ProxyModule],
+      providers: [
+        {
+          provide: ProxyService,
+          useValue: {
+            forwardRequest: jest.fn(),
+          },
+        },
+        {
+          provide: ConfigService,
+          useValue: {
+            getOrThrow: jest
+              .fn()
+              .mockReturnValueOnce('http://localhost:3001')
+              .mockReturnValueOnce('http://localhost:3002'),
+          },
+        },
+      ],
     }).compile();
   });
 
