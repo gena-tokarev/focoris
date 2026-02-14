@@ -16,20 +16,19 @@ export class AppController {
     this.configService.getOrThrow<string>('SKILL_BOOK_API_URL');
 
   @Get('health')
-  ///1213
   health() {
     return { status: 'ok', service: 'gateway' };
   }
 
-  @All('auth/*path')
+  @All(['auth', 'auth/*path'])
   auth(@Req() req: Request, @Res() res: Response) {
-    req.url = req.originalUrl.replace(/^\/auth/, '');
+    req.url = req.originalUrl.replace(/^\/api\/auth/, '/api');
     return this.proxyService.forwardRequest(this.authTarget, req, res);
   }
 
-  @All('skill-book/*path')
+  @All(['skill-book', 'skill-book/*path'])
   core(@Req() req: Request, @Res() res: Response) {
-    req.url = req.originalUrl.replace(/^\/skill-book/, '');
+    req.url = req.originalUrl.replace(/^\/api\/skill-book/, '/api');
     return this.proxyService.forwardRequest(this.coreTarget, req, res);
   }
 }
