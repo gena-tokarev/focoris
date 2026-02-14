@@ -1,10 +1,10 @@
 {
-  "name": "@org/auth-api-e2e",
+  "name": "@focoris/auth-api-e2e",
   "version": "0.0.1",
   "private": true,
   "nx": {
     "implicitDependencies": [
-      "@org/auth-api"
+      "@focoris/auth-api"
     ],
     "targets": {
       "e2e": {
@@ -17,8 +17,8 @@
           "passWithNoTests": true
         },
         "dependsOn": [
-          "@org/auth-api:build",
-          "@org/auth-api:serve"
+          "@focoris/auth-api:build",
+          "@focoris/auth-api:serve"
         ]
       }
     }

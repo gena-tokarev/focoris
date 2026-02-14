@@ -1,23 +1,26 @@
 {
-  "name": "@org/gateway",
+  "name": "@focoris/gateway",
   "version": "0.0.1",
   "private": true,
   "nx": {
     "targets": {
       "build": {
-        "executor": "nx:run-commands",
+        "executor": "@nx/webpack:webpack",
+        "outputs": [
+          "{options.outputPath}"
+        ],
         "options": {
-          "command": "webpack-cli build",
-          "args": [
-            "--node-env=production"
-          ],
-          "cwd": "gateway"
+          "target": "node",
+          "compiler": "tsc",
+          "main": "gateway/src/main.ts",
+          "tsConfig": "gateway/tsconfig.app.json",
+          "webpackConfig": "gateway/webpack.config.js",
+          "outputPath": "dist/gateway"
         },
         "configurations": {
           "development": {
-            "args": [
-              "--node-env=development"
-            ]
+            "watch": true,
+            "sourceMap": true
           }
         }
       },
@@ -63,15 +66,21 @@
           "build"
         ],
         "options": {
-          "buildTarget": "@org/gateway:build",
+          "buildTarget": "@focoris/gateway:build",
           "runBuildTargetDependencies": false
         },
         "configurations": {
           "development": {
-            "buildTarget": "@org/gateway:build:development"
+            "buildTarget": "@focoris/gateway:build:development"
+          },
+          "debug": {
+            "buildTarget": "@focoris/gateway:build:development",
+            "inspect": "inspect",
+            "host": "127.0.0.1",
+            "port": 9229
           },
           "production": {
-            "buildTarget": "@org/gateway:build:production"
+            "buildTarget": "@focoris/gateway:build:production"
           }
         }
       },
@@ -84,13 +93,20 @@
   },
   "dependencies": {
     "@nestjs/common": "^11.0.0",
+    "@nestjs/config": "^4.0.3",
     "@nestjs/core": "^11.0.0",
     "@nestjs/platform-express": "^11.0.0",
+    "@nx/webpack": "22.5.0",
+    "express": "^5.2.1",
+    "http-proxy": "^1.18.1",
+    "joi": "^18.0.2",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.0",
     "tslib": "^2.3.0"
   },
   "devDependencies": {
-    "@nestjs/testing": "^11.0.0"
+    "@nestjs/testing": "^11.0.0",
+    "@types/express": "^5.0.6",
+    "@types/http-proxy": "^1.17.17"
   }
 }

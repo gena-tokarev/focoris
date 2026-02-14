@@ -1,0 +1,11 @@
+.git
+.gitignore
+.github
+.vscode
+.history
+.gemini
+.nx/cache
+node_modules
+dist
+coverage
+*.log

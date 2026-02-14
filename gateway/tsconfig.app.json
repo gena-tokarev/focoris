@@ -5,6 +5,8 @@
     "types": ["node"],
     "rootDir": "src",
     "tsBuildInfoFile": "dist/tsconfig.app.tsbuildinfo",
+    "sourceMap": true,
+    "inlineSources": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "target": "es2021"

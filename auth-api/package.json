@@ -1,23 +1,29 @@
 {
-  "name": "@org/auth-api",
+  "name": "@focoris/auth-api",
   "version": "0.0.1",
   "private": true,
   "nx": {
     "targets": {
       "build": {
-        "executor": "nx:run-commands",
+        "executor": "@nx/webpack:webpack",
+        "outputs": [
+          "{options.outputPath}"
+        ],
         "options": {
-          "command": "webpack-cli build",
-          "args": [
-            "--node-env=production"
-          ],
-          "cwd": "auth-api"
+          "target": "node",
+          "compiler": "tsc",
+          "main": "auth-api/src/main.ts",
+          "tsConfig": "auth-api/tsconfig.app.json",
+          "webpackConfig": "auth-api/webpack.config.js",
+          "outputPath": "dist/auth-api"
         },
         "configurations": {
           "development": {
-            "args": [
-              "--node-env=development"
-            ]
+            "watch": true,
+            "sourceMap": true
+          },
+          "production": {
+            "optimization": true
           }
         }
       },
@@ -28,8 +34,8 @@
         "cache": true,
         "executor": "@nx/js:prune-lockfile",
         "outputs": [
-          "{workspaceRoot}/auth-api/dist/package.json",
-          "{workspaceRoot}/auth-api/dist/pnpm-lock.yaml"
+          "{workspaceRoot}/dist/auth-api/package.json",
+          "{workspaceRoot}/dist/auth-api/pnpm-lock.yaml"
         ],
         "options": {
           "buildTarget": "build"
@@ -41,7 +47,7 @@
         ],
         "cache": true,
         "outputs": [
-          "{workspaceRoot}/auth-api/dist/workspace_modules"
+          "{workspaceRoot}/dist/auth-api/workspace_modules"
         ],
         "executor": "@nx/js:copy-workspace-modules",
         "options": {
@@ -63,15 +69,21 @@
           "build"
         ],
         "options": {
-          "buildTarget": "@org/auth-api:build",
+          "buildTarget": "@focoris/auth-api:build",
           "runBuildTargetDependencies": false
         },
         "configurations": {
           "development": {
-            "buildTarget": "@org/auth-api:build:development"
+            "buildTarget": "@focoris/auth-api:build:development"
+          },
+          "debug": {
+            "buildTarget": "@focoris/auth-api:build:development",
+            "inspect": "inspect",
+            "host": "127.0.0.1",
+            "port": 9230
           },
           "production": {
-            "buildTarget": "@org/auth-api:build:production"
+            "buildTarget": "@focoris/auth-api:build:production"
           }
         }
       },

@@ -1,25 +1,15 @@
-const { NxAppWebpackPlugin } = require('@nx/webpack/app-plugin');
-const { join } = require('path');
+const { composePlugins, withNx } = require('@nx/webpack');
 
-module.exports = {
-  output: {
-    path: join(__dirname, 'dist'),
-    clean: true,
-    ...(process.env.NODE_ENV !== 'production' && {
-      devtoolModuleFilenameTemplate: '[absolute-resource-path]',
-    }),
+module.exports = composePlugins(
+  // Default Nx composable plugin
+  withNx(),
+  // Custom composable plugin
+  (config, { context }) => {
+    if (context.configurationName !== 'production') {
+      // Use full source maps in dev/debug for accurate TS breakpoint mapping.
+      config.devtool = 'source-map';
+    }
+
+    return config;
   },
-  plugins: [
-    new NxAppWebpackPlugin({
-      target: 'node',
-      compiler: 'tsc',
-      main: './src/main.ts',
-      tsConfig: './tsconfig.app.json',
-      assets: ['./src/assets'],
-      optimization: false,
-      outputHashing: 'none',
-      generatePackageJson: false,
-      sourceMap: true,
-    }),
-  ],
-};
+);

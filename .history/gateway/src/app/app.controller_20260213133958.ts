@@ -11,7 +11,7 @@ export class AppController {
   }
 
   @Get('health')
-health() {
-  return { status: 'ok', service: 'auth-api' };
-}
+  health() {
+    return { status: 'ok', service: 'auth-api' };
+  }
 }

@@ -4,54 +4,97 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Debug @org/gateway with Nx",
-      "runtimeExecutable": "pnpm exec",
-      "runtimeArgs": ["nx", "serve", "@org/gateway"],
-      "env": {
-        "NODE_OPTIONS": "--inspect=9229"
-      },
+      "name": "Debug All APIs with Nx",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": [
+        "exec",
+        "nx",
+        "run-many",
+        "--target=serve",
+        "--configuration=debug",
+        "--projects=@focoris/gateway,@focoris/auth-api,@focoris/skillbook-api",
+        "--parallel"
+      ],
+      "autoAttachChildProcesses": true,
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
       "skipFiles": ["<node_internals>/**"],
       "sourceMaps": true,
+      "sourceMapPathOverrides": {
+        "webpack://@focoris/gateway/./src/*": "${workspaceFolder}/gateway/src/*",
+        "webpack://@focoris/auth-api/./src/*": "${workspaceFolder}/auth-api/src/*",
+        "webpack://@focoris/skillbook-api/./src/*": "${workspaceFolder}/skillbook-api/src/*",
+        "webpack:///./*": "${workspaceFolder}/*"
+      },
       "outFiles": [
-        "${workspaceFolder}/gateway/dist/**/*.(m|c|)js",
+        "${workspaceFolder}/dist/gateway/**/*.js",
+        "${workspaceFolder}/dist/auth-api/**/*.js",
+        "${workspaceFolder}/dist/skillbook-api/**/*.js",
         "!**/node_modules/**"
       ]
     },
     {
       "type": "node",
       "request": "launch",
-      "name": "Debug @org/auth-api with Nx",
-      "runtimeExecutable": "pnpm exec",
-      "runtimeArgs": ["nx", "serve", "@org/auth-api"],
-      "env": {
-        "NODE_OPTIONS": "--inspect=9230"
-      },
+      "name": "Debug @focoris/gateway with Nx",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["exec", "nx", "run", "@focoris/gateway:serve:debug"],
+      "autoAttachChildProcesses": true,
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
       "skipFiles": ["<node_internals>/**"],
       "sourceMaps": true,
+      "sourceMapPathOverrides": {
+        "webpack://@focoris/gateway/./src/*": "${workspaceFolder}/gateway/src/*",
+        "webpack:///./*": "${workspaceFolder}/*"
+      },
       "outFiles": [
-        "${workspaceFolder}/auth-api/dist/**/*.(m|c|)js",
+        "${workspaceFolder}/dist/gateway/**/*.js",
         "!**/node_modules/**"
       ]
     },
     {
       "type": "node",
       "request": "launch",
-      "name": "Debug @org/skillbook-api with Nx",
-      "runtimeExecutable": "pnpm exec",
-      "runtimeArgs": ["nx", "serve", "@org/skillbook-api"],
-      "env": {
-        "NODE_OPTIONS": "--inspect=9231"
-      },
+      "name": "Debug @focoris/auth-api with Nx",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["exec", "nx", "run", "@focoris/auth-api:serve:debug"],
+      "autoAttachChildProcesses": true,
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
       "skipFiles": ["<node_internals>/**"],
       "sourceMaps": true,
+      "sourceMapPathOverrides": {
+        "webpack://@focoris/auth-api/./src/*": "${workspaceFolder}/auth-api/src/*",
+        "webpack:///./*": "${workspaceFolder}/*"
+      },
       "outFiles": [
-        "${workspaceFolder}/skillbook-api/dist/**/*.(m|c|)js",
+        "${workspaceFolder}/dist/auth-api/**/*.js",
+        "!**/node_modules/**"
+      ]
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug @focoris/skillbook-api with Nx",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": [
+        "exec",
+        "nx",
+        "run",
+        "@focoris/skillbook-api:serve:debug"
+      ],
+      "autoAttachChildProcesses": true,
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "skipFiles": ["<node_internals>/**"],
+      "sourceMaps": true,
+      "sourceMapPathOverrides": {
+        "webpack://@focoris/skillbook-api/./src/*": "${workspaceFolder}/skillbook-api/src/*",
+        "webpack:///./*": "${workspaceFolder}/*"
+      },
+      "outFiles": [
+        "${workspaceFolder}/dist/skillbook-api/**/*.js",
         "!**/node_modules/**"
       ]
     }
