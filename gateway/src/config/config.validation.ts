@@ -1,6 +1,10 @@
-import * as Joi from 'joi';
+import { z } from 'zod';
 
-export const validationSchema = Joi.object({
-  AUTH_API_URL: Joi.string().uri().required(),
-  SKILL_BOOK_API_URL: Joi.string().uri().required(),
+const envSchema = z.object({
+  AUTH_API_URL: z.string().url(),
+  SKILL_BOOK_API_URL: z.string().url(),
 });
+
+export function validateEnv(config: Record<string, unknown>) {
+  return envSchema.parse(config);
+}
