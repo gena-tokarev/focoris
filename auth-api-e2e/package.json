@@ -2,6 +2,12 @@
   "name": "@focoris/auth-api-e2e",
   "version": "0.0.1",
   "private": true,
+  "devDependencies": {
+    "@prisma/client": "^6.19.2",
+    "bcryptjs": "^3.0.0",
+    "dotenv": "^16.6.1",
+    "testcontainers": "^10.28.0"
+  },
   "nx": {
     "implicitDependencies": [
       "@focoris/auth-api"
@@ -17,10 +23,19 @@
           "passWithNoTests": true
         },
         "dependsOn": [
-          "@focoris/auth-api:build",
-          "@focoris/auth-api:serve"
+          "@focoris/auth-api:db:generate",
+          "@focoris/auth-api:build"
         ]
+      },
+      "e2e-ci": {
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "pnpm exec nx run @focoris/auth-api-e2e:e2e"
+        }
       }
     }
+  },
+  "dependencies": {
+    "@testcontainers/postgresql": "^11.12.0"
   }
 }

@@ -37,6 +37,8 @@ jobs:
 
       - run: pnpm --version
       - run: pnpm install --frozen-lockfile
+      - run: cp auth-api/.env.example auth-api/.env.test
+      - run: npx nx run @focoris/auth-api:db:generate
 
       # Prepend any command with "nx record --" to record its logs to Nx Cloud
       - run: npx nx record -- npx nx format:check --base="remotes/origin/main"

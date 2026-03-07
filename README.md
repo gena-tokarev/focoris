@@ -39,6 +39,20 @@ pnpm install
 
 ## Run Locally
 
+Start PostgreSQL:
+
+```bash
+docker compose up -d postgres
+```
+
+Prepare auth database (once, or when schema changes):
+
+```bash
+pnpm exec nx run @focoris/auth-api:db:generate
+pnpm exec nx run @focoris/auth-api:db:migrate
+pnpm exec nx run @focoris/auth-api:db:seed
+```
+
 Run all APIs in dev mode:
 
 ```bash
@@ -50,6 +64,30 @@ Health checks:
 - `http://localhost:3000/api/health`
 - `http://localhost:3001/api/health`
 - `http://localhost:3002/api/health`
+
+## Auth E2E
+
+Auth e2e runs with one Nx/Jest target and uses Testcontainers inside Jest global setup.
+The setup starts:
+- a temporary PostgreSQL container
+- Prisma migrations against that container
+- `auth-api` (`@focoris/auth-api:serve:test`)
+
+Run:
+
+```bash
+cp auth-api-e2e/.env.example auth-api-e2e/.env
+cp auth-api/.env.test.example auth-api/.env.test
+pnpm exec nx run @focoris/auth-api-e2e:e2e
+```
+
+`auth-api-e2e/.env` configures API port and test Postgres container settings.
+
+CI target:
+
+```bash
+pnpm exec nx run @focoris/auth-api-e2e:e2e-ci
+```
 
 ## Debug
 
@@ -69,6 +107,12 @@ VS Code launch configurations are in `.vscode/launch.json`:
 
 ## Run with Docker Compose
 
+Create root env file first:
+
+```bash
+cp .env.example .env
+```
+
 ```bash
 docker compose up --build
 ```
@@ -80,6 +124,7 @@ docker compose down
 ```
 
 Gateway is reachable at `http://localhost:3000`.
+PostgreSQL is reachable at `localhost:5432`.
 
 ## Project Structure
 

@@ -49,3 +49,6 @@ test-output
 
 .env
 !.env.example
+auth-api/.env.test
+# E2E runtime artifacts
+auth-api-e2e/.tmp/

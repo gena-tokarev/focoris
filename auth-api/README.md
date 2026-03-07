@@ -1,30 +1,67 @@
 # Auth API Service
 
-Auth API is the centralized authentication backend for the portal.
-
-## Responsibilities
-
-- Provide auth-focused endpoints (current scaffold + future login/token flows)
-- Act as the single auth source for gateway and downstream apps
+Auth API is the central authentication service for the portal.
 
 ## Runtime
 
-- Default port: `3001`
+- Port: `3001`
 - Global prefix: `/api`
+- Auth routes: `/api/auth/*`
 
-## Current Endpoints
+## Endpoints
 
-- `GET /api` - sample data endpoint
-- `GET /api/health` - service health endpoint
+- `POST /api/auth/login`
+- `POST /api/auth/refresh`
+- `POST /api/auth/logout`
+- `GET /api/auth/me`
+- `GET /api/health`
 
 ## Environment Variables
 
-- `PORT` (optional, default `3001`)
+- `PORT` default `3001`
+- `DATABASE_URL` PostgreSQL connection string
+- `AUTH_ACCESS_TOKEN_SECRET`
+- `AUTH_REFRESH_TOKEN_SECRET`
+- `AUTH_ACCESS_TOKEN_TTL_SECONDS`
+- `AUTH_REFRESH_TOKEN_TTL_SECONDS`
+
+## Database
+
+Prisma schema: `auth-api/prisma/schema.prisma`
+
+Generate client:
+
+```bash
+pnpm exec nx run @focoris/auth-api:db:generate
+```
+
+Create/apply migration:
+
+```bash
+pnpm exec nx run @focoris/auth-api:db:migrate
+```
+
+Seed default admin:
+
+```bash
+pnpm exec nx run @focoris/auth-api:db:seed
+```
+
+Default seed user:
+- email: `admin@focoris.local`
+- password: `admin123`
 
 ## Run
 
 ```bash
 pnpm exec nx run @focoris/auth-api:serve
+```
+
+Run with test env file:
+
+```bash
+cp auth-api/.env.test.example auth-api/.env.test
+pnpm exec nx run @focoris/auth-api:serve:test
 ```
 
 ## Debug
@@ -35,20 +72,10 @@ pnpm exec nx run @focoris/auth-api:serve:debug
 
 Inspector port: `9230`
 
-## Build
-
-```bash
-pnpm exec nx run @focoris/auth-api:build:production
-```
-
-Output: `dist/auth-api`
-
 ## Docker
 
-Dockerfile: `auth-api/Dockerfile`
-
-Run via root compose:
+Use root compose with PostgreSQL:
 
 ```bash
-docker compose up auth-api --build
+docker compose up postgres auth-api --build
 ```

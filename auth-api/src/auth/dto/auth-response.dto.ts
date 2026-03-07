@@ -1,4 +1,5 @@
-export type UserRole = 'admin' | 'member';
+import { UserRole } from '@prisma/client';
+export { UserRole };
 
 export interface AuthUserDto {
   id: string;
@@ -30,12 +31,13 @@ export interface MeResponseDto {
   user: AuthUserDto;
 }
 
-export type AuthErrorCode =
-  | 'AUTH_INVALID_CREDENTIALS'
-  | 'AUTH_INVALID_REFRESH_TOKEN'
-  | 'AUTH_INVALID_ACCESS_TOKEN'
-  | 'AUTH_MISSING_BEARER_TOKEN'
-  | 'AUTH_NOT_IMPLEMENTED';
+export enum AuthErrorCode {
+  InvalidCredentials = 'AUTH_INVALID_CREDENTIALS',
+  InvalidRefreshToken = 'AUTH_INVALID_REFRESH_TOKEN',
+  InvalidAccessToken = 'AUTH_INVALID_ACCESS_TOKEN',
+  MissingBearerToken = 'AUTH_MISSING_BEARER_TOKEN',
+  NotImplemented = 'AUTH_NOT_IMPLEMENTED',
+}
 
 export interface AuthErrorResponseDto {
   statusCode: number;

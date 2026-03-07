@@ -2,6 +2,9 @@
   "name": "@focoris/auth-api",
   "version": "0.0.1",
   "private": true,
+  "prisma": {
+    "seed": "node prisma/seed.mjs"
+  },
   "nx": {
     "targets": {
       "build": {
@@ -82,6 +85,12 @@
             "host": "127.0.0.1",
             "port": 9230
           },
+          "test": {
+            "buildTarget": "@focoris/auth-api:build:development",
+            "runtimeArgs": [
+              "--env-file=auth-api/.env.test"
+            ]
+          },
           "production": {
             "buildTarget": "@focoris/auth-api:build:production"
           }
@@ -91,6 +100,24 @@
         "options": {
           "passWithNoTests": true
         }
+      },
+      "db:generate": {
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "pnpm -C auth-api exec prisma generate --schema prisma/schema.prisma"
+        }
+      },
+      "db:migrate": {
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "pnpm -C auth-api exec prisma migrate dev --schema prisma/schema.prisma"
+        }
+      },
+      "db:seed": {
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "pnpm -C auth-api exec prisma db seed --schema prisma/schema.prisma"
+        }
       }
     }
   },
@@ -98,13 +125,17 @@
     "@nestjs/common": "^11.0.0",
     "@nestjs/config": "^4.0.3",
     "@nestjs/core": "^11.0.0",
+    "@nestjs/jwt": "^11.0.1",
     "@nestjs/platform-express": "^11.0.0",
+    "@prisma/client": "^6.19.2",
+    "bcryptjs": "^3.0.0",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.0",
     "tslib": "^2.3.0",
     "zod": "^3.24.1"
   },
   "devDependencies": {
-    "@nestjs/testing": "^11.0.0"
+    "@nestjs/testing": "^11.0.0",
+    "prisma": "^6.16.2"
   }
 }
