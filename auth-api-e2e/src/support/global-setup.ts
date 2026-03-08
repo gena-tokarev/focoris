@@ -56,8 +56,9 @@ module.exports = async function () {
     .start();
 
   const dbUrl = `${postgres.getConnectionUri()}?schema=public`;
+  const { NODE_OPTIONS, VSCODE_INSPECTOR_OPTIONS, ...baseEnv } = process.env;
   const commandEnv = {
-    ...process.env,
+    ...baseEnv,
     DATABASE_URL: dbUrl,
     PORT: String(authApiPort),
   };

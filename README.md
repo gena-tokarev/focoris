@@ -45,6 +45,12 @@ Start PostgreSQL:
 docker compose up -d postgres
 ```
 
+Optional test PostgreSQL service:
+
+```bash
+docker compose up -d postgres-test
+```
+
 Prepare auth database (once, or when schema changes):
 
 ```bash
@@ -125,6 +131,7 @@ docker compose down
 
 Gateway is reachable at `http://localhost:3000`.
 PostgreSQL is reachable at `localhost:5432`.
+Test PostgreSQL is reachable at `localhost:5433`.
 
 ## Project Structure
 
