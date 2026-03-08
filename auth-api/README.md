@@ -79,3 +79,9 @@ Use root compose with PostgreSQL:
 ```bash
 docker compose up postgres auth-api --build
 ```
+
+Optional test database container:
+
+```bash
+docker compose up -d postgres-test
+```

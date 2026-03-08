@@ -87,6 +87,7 @@
           },
           "test": {
             "buildTarget": "@focoris/auth-api:build:development",
+            "inspect": false,
             "runtimeArgs": [
               "--env-file=auth-api/.env.test"
             ]
