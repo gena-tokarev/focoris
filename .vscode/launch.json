@@ -64,10 +64,6 @@
       "internalConsoleOptions": "neverOpen",
       "skipFiles": ["<node_internals>/**"],
       "sourceMaps": true,
-      "sourceMapPathOverrides": {
-        "webpack://@focoris/auth-api/./src/*": "${workspaceFolder}/auth-api/src/*",
-        "webpack:///./*": "${workspaceFolder}/*"
-      },
       "outFiles": [
         "${workspaceFolder}/dist/auth-api/**/*.js",
         "!**/node_modules/**"

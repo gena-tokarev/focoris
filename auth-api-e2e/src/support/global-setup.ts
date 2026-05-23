@@ -78,15 +78,11 @@ module.exports = async function () {
     commandEnv,
   );
 
-  spawn(
-    'pnpm',
-    ['exec', 'nx', 'run', '@focoris/auth-api:serve:test'],
-    {
-      env: commandEnv,
-      cwd: WORKSPACE_ROOT,
-      stdio: 'inherit',
-    },
-  );
+  spawn('pnpm', ['exec', 'nx', 'serve', '@focoris/auth-api'], {
+    env: commandEnv,
+    cwd: WORKSPACE_ROOT,
+    stdio: 'inherit',
+  });
 
   await waitForPortOpen(authApiPort, { host });
 

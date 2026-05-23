@@ -40,6 +40,20 @@ describe('Auth API flow', () => {
     expect(me.status).toBe(200);
     expect(me.data.user.email).toBe(fixtureUser.email);
 
+    const meWithoutToken = await axios.get('/api/auth/me', {
+      validateStatus: () => true,
+    });
+    expect(meWithoutToken.status).toBe(401);
+    expect(meWithoutToken.data.code).toBe('AUTH_MISSING_BEARER_TOKEN');
+
+    const adminHealth = await axios.get('/api/auth/admin/health', {
+      headers: {
+        authorization: `Bearer ${accessToken}`,
+      },
+    });
+    expect(adminHealth.status).toBe(200);
+    expect(adminHealth.data).toEqual({ status: 'ok' });
+
     const refreshed = await axios.post('/api/auth/refresh', {
       refreshToken: initialRefreshToken,
     });

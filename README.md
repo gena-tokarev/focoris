@@ -45,12 +45,6 @@ Start PostgreSQL:
 docker compose up -d postgres
 ```
 
-Optional test PostgreSQL service:
-
-```bash
-docker compose up -d postgres-test
-```
-
 Prepare auth database (once, or when schema changes):
 
 ```bash
@@ -73,21 +67,27 @@ Health checks:
 
 ## Auth E2E
 
-Auth e2e runs with one Nx/Jest target and uses Testcontainers inside Jest global setup.
-The setup starts:
-- a temporary PostgreSQL container
-- Prisma migrations against that container
-- `auth-api` (`@focoris/auth-api:serve:test`)
+Auth e2e uses Testcontainers and starts its own isolated PostgreSQL instance automatically.
+The test setup:
+
+- loads `auth-api-e2e/.env`
+- starts a temporary PostgreSQL container
+- runs Prisma migrations against that container
+- starts `@focoris/auth-api` with `DATABASE_URL` and `PORT` injected from the e2e runtime
+
+This means e2e does not depend on a manually prepared local test database and does not need `auth-api/.env.test`.
 
 Run:
 
 ```bash
-cp auth-api-e2e/.env.example auth-api-e2e/.env
-cp auth-api/.env.test.example auth-api/.env.test
 pnpm exec nx run @focoris/auth-api-e2e:e2e
 ```
 
-`auth-api-e2e/.env` configures API port and test Postgres container settings.
+Optional local env file:
+
+```bash
+cp auth-api-e2e/.env.example auth-api-e2e/.env
+```
 
 CI target:
 
@@ -131,7 +131,6 @@ docker compose down
 
 Gateway is reachable at `http://localhost:3000`.
 PostgreSQL is reachable at `localhost:5432`.
-Test PostgreSQL is reachable at `localhost:5433`.
 
 ## Project Structure
 

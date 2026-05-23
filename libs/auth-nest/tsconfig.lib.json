@@ -1,12 +1,11 @@
 {
-  "extends": "../tsconfig.base.json",
+  "extends": "./tsconfig.json",
   "compilerOptions": {
-    "outDir": "dist",
+    "outDir": "../../dist/out-tsc",
+    "rootDir": "./src",
+    "tsBuildInfoFile": "../../dist/libs/auth-nest/tsconfig.lib.tsbuildinfo",
+    "declaration": true,
     "types": ["node"],
-    "rootDir": "src",
-    "tsBuildInfoFile": "dist/tsconfig.app.tsbuildinfo",
-    "sourceMap": true,
-    "inlineSources": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "target": "es2021"
@@ -22,10 +21,5 @@
     "eslint.config.js",
     "eslint.config.cjs",
     "eslint.config.mjs"
-  ],
-  "references": [
-    {
-      "path": "../libs/auth-nest/tsconfig.lib.json"
-    }
   ]
 }

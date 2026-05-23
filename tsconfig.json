@@ -4,6 +4,9 @@
   "files": [],
   "references": [
     {
+      "path": "./libs/auth-nest"
+    },
+    {
       "path": "./gateway-e2e"
     },
     {

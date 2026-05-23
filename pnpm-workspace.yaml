@@ -1,5 +1,5 @@
 packages:
-  - 'packages/*'
+  - 'libs/*'
   - 'gateway'
   - 'gateway-e2e'
   - 'auth-api'

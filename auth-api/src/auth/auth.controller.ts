@@ -2,24 +2,25 @@ import {
   Body,
   Controller,
   Get,
-  Headers,
   HttpCode,
   HttpStatus,
   Post,
-  UnauthorizedException,
+  UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginRequestDto } from './dto/login-request.dto';
 import { RefreshRequestDto } from './dto/refresh-request.dto';
 import { LogoutRequestDto } from './dto/logout-request.dto';
-import { AuthErrorCode } from './dto/auth-response.dto';
+import { UserRole } from './dto/auth-response.dto';
 import type {
-  AuthErrorResponseDto,
   LoginResponseDto,
   LogoutResponseDto,
   MeResponseDto,
   RefreshResponseDto,
 } from './dto/auth-response.dto';
+import { CurrentUser, Roles, RolesGuard } from '@focoris/auth-nest';
+import type { AuthJwtPayload } from '@focoris/auth-nest';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -41,21 +42,22 @@ export class AuthController {
     return this.authService.logout(payload);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get('me')
-  me(@Headers('authorization') authorization?: string): Promise<MeResponseDto> {
-    const accessToken = this.extractBearerToken(authorization);
-    return this.authService.me(accessToken);
+  me(@CurrentUser() user: AuthJwtPayload): Promise<MeResponseDto> {
+    return this.authService.me(user.sub);
   }
 
-  private extractBearerToken(authorization?: string): string {
-    const [scheme, token] = authorization?.split(' ') ?? [];
-    if (scheme !== 'Bearer' || !token) {
-      throw new UnauthorizedException({
-        statusCode: 401,
-        code: AuthErrorCode.MissingBearerToken,
-        message: 'Missing or invalid bearer token',
-      } satisfies AuthErrorResponseDto);
-    }
-    return token;
+  @UseGuards(JwtAuthGuard)
+  @Get('test')
+  test() {
+    return { status: 'ok', message: 'This is a test endpoint 3' };
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.admin)
+  @Get('admin/health')
+  adminHealth(): { status: 'ok' } {
+    return { status: 'ok' };
   }
 }

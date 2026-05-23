@@ -54,23 +54,53 @@ Default seed user:
 ## Run
 
 ```bash
-pnpm exec nx run @focoris/auth-api:serve
+pnpm nx serve @focoris/auth-api
 ```
 
-Run with test env file:
+Equivalent explicit development command:
 
 ```bash
-cp auth-api/.env.test.example auth-api/.env.test
-pnpm exec nx run @focoris/auth-api:serve:test
+pnpm nx run @focoris/auth-api:serve:development
+```
+
+Build without starting the app:
+
+```bash
+pnpm nx run @focoris/auth-api:build
 ```
 
 ## Debug
 
 ```bash
-pnpm exec nx run @focoris/auth-api:serve:debug
+pnpm nx run @focoris/auth-api:serve:debug
 ```
 
 Inspector port: `9230`
+
+If changes in shared libs under `libs/` do not trigger restarts, start the Nx daemon once:
+
+```bash
+pnpm nx daemon --start
+pnpm nx daemon
+```
+
+You should see `Nx Daemon is running.` after that.
+
+## E2E
+
+`auth-api-e2e` uses Testcontainers and starts its own PostgreSQL database automatically.
+The e2e setup:
+
+- loads `auth-api-e2e/.env`
+- starts a temporary PostgreSQL container
+- runs Prisma migrations against that container
+- starts `@focoris/auth-api` with runtime `DATABASE_URL` and `PORT` overrides
+
+Run:
+
+```bash
+pnpm exec nx run @focoris/auth-api-e2e:e2e
+```
 
 ## Docker
 
@@ -78,10 +108,4 @@ Use root compose with PostgreSQL:
 
 ```bash
 docker compose up postgres auth-api --build
-```
-
-Optional test database container:
-
-```bash
-docker compose up -d postgres-test
 ```

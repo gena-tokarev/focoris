@@ -8,26 +8,18 @@
   "nx": {
     "targets": {
       "build": {
-        "executor": "@nx/webpack:webpack",
+        "dependsOn": [
+          "^build"
+        ],
+        "executor": "@nx/js:swc",
         "outputs": [
           "{options.outputPath}"
         ],
         "options": {
-          "target": "node",
-          "compiler": "tsc",
           "main": "auth-api/src/main.ts",
           "tsConfig": "auth-api/tsconfig.app.json",
-          "webpackConfig": "auth-api/webpack.config.js",
-          "outputPath": "dist/auth-api"
-        },
-        "configurations": {
-          "development": {
-            "watch": true,
-            "sourceMap": true
-          },
-          "production": {
-            "optimization": true
-          }
+          "outputPath": "dist/auth-api",
+          "swcrc": "auth-api/.swcrc"
         }
       },
       "prune-lockfile": {
@@ -73,27 +65,17 @@
         ],
         "options": {
           "buildTarget": "@focoris/auth-api:build",
-          "runBuildTargetDependencies": false
+          "runBuildTargetDependencies": true
         },
         "configurations": {
           "development": {
-            "buildTarget": "@focoris/auth-api:build:development"
+            "buildTarget": "@focoris/auth-api:build"
           },
           "debug": {
-            "buildTarget": "@focoris/auth-api:build:development",
+            "buildTarget": "@focoris/auth-api:build",
             "inspect": "inspect",
             "host": "127.0.0.1",
             "port": 9230
-          },
-          "test": {
-            "buildTarget": "@focoris/auth-api:build:development",
-            "inspect": false,
-            "runtimeArgs": [
-              "--env-file=auth-api/.env.test"
-            ]
-          },
-          "production": {
-            "buildTarget": "@focoris/auth-api:build:production"
           }
         }
       },
@@ -136,6 +118,7 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
+    "@focoris/auth-nest": "workspace:*",
     "@nestjs/testing": "^11.0.0",
     "prisma": "^6.16.2"
   }

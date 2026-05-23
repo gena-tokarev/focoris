@@ -54,6 +54,7 @@ services:
       dockerfile: skillbook-api/Dockerfile
     environment:
       PORT: ${SKILLBOOK_API_PORT}
+      AUTH_ACCESS_TOKEN_SECRET: ${AUTH_ACCESS_TOKEN_SECRET}
     ports:
       - "${SKILLBOOK_API_PORT}:3002"
 

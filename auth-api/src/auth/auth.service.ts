@@ -20,24 +20,9 @@ import {
   LogoutResponseDto,
   MeResponseDto,
   RefreshResponseDto,
-  UserRole,
 } from './dto/auth-response.dto';
 import { PrismaService } from '../prisma/prisma.service';
-
-enum JwtTokenType {
-  Access = 'access',
-  Refresh = 'refresh',
-}
-
-interface AuthJwtPayload {
-  sub: string;
-  email: string;
-  roles: UserRole[];
-  type: JwtTokenType;
-  jti: string;
-  iat?: number;
-  exp?: number;
-}
+import { AuthJwtPayload, JwtTokenType } from '@focoris/auth-nest';
 
 interface UserRecord {
   id: string;
@@ -128,24 +113,24 @@ export class AuthService {
 
     const rotatedTokens = await this.prisma.$transaction(
       async (tx: Prisma.TransactionClient) => {
-      const revoked = await tx.refreshSession.updateMany({
-        where: {
-          tokenId: parsedToken.jti,
-          userId: parsedToken.sub,
-          tokenHash: incomingTokenHash,
-          revokedAt: null,
-          expiresAt: { gt: new Date() },
-        },
-        data: { revokedAt: new Date() },
-      });
+        const revoked = await tx.refreshSession.updateMany({
+          where: {
+            tokenId: parsedToken.jti,
+            userId: parsedToken.sub,
+            tokenHash: incomingTokenHash,
+            revokedAt: null,
+            expiresAt: { gt: new Date() },
+          },
+          data: { revokedAt: new Date() },
+        });
 
-      if (revoked.count !== 1) {
-        throw new UnauthorizedException({
-          statusCode: 401,
-          code: AuthErrorCode.InvalidRefreshToken,
-          message: 'Invalid refresh token',
-        } satisfies AuthErrorResponseDto);
-      }
+        if (revoked.count !== 1) {
+          throw new UnauthorizedException({
+            statusCode: 401,
+            code: AuthErrorCode.InvalidRefreshToken,
+            message: 'Invalid refresh token',
+          } satisfies AuthErrorResponseDto);
+        }
 
         return this.issueTokenPair(user, tx);
       },
@@ -179,9 +164,8 @@ export class AuthService {
     return { success: true };
   }
 
-  async me(accessToken: string): Promise<MeResponseDto> {
-    const parsedToken = this.verifyToken(accessToken, JwtTokenType.Access);
-    const user = await this.getUserById(parsedToken.sub);
+  async me(userId: string): Promise<MeResponseDto> {
+    const user = await this.getUserById(userId);
 
     return {
       user: this.toAuthUser(user),
