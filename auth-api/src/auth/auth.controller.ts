@@ -4,31 +4,44 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Inject,
   Post,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { LoginRequestDto } from './dto/login-request.dto';
 import { RefreshRequestDto } from './dto/refresh-request.dto';
 import { LogoutRequestDto } from './dto/logout-request.dto';
+import { RegisterRequestDto } from './dto/register-request.dto';
 import { UserRole } from './dto/auth-response.dto';
 import type {
   LoginResponseDto,
   LogoutResponseDto,
   MeResponseDto,
   RefreshResponseDto,
+  RegisterResponseDto,
 } from './dto/auth-response.dto';
 import { CurrentUser, Roles, RolesGuard } from '@focoris/auth-nest';
 import type { AuthJwtPayload } from '@focoris/auth-nest';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { LocalAuthGuard } from './guards/local-auth.guard';
+import type { AuthenticatedUser } from './auth.service';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(@Inject(AuthService) private readonly authService: AuthService) {}
 
+  @Post('register')
+  register(@Body() payload: RegisterRequestDto): Promise<RegisterResponseDto> {
+    return this.authService.register(payload);
+  }
+
+  @UseGuards(LocalAuthGuard)
   @Post('login')
-  login(@Body() payload: LoginRequestDto): Promise<LoginResponseDto> {
-    return this.authService.login(payload);
+  login(
+    @Req() request: { user: AuthenticatedUser },
+  ): Promise<LoginResponseDto> {
+    return this.authService.login(request.user);
   }
 
   @Post('refresh')
@@ -51,7 +64,19 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Get('test')
   test() {
-    return { status: 'ok', message: 'This is a test endpoint 3' };
+    return { status: 'ok', message: 'This is a test endpoint' };
+  }
+
+  @Get('test2')
+  test2() {
+    return { status: 'ok', message: 'This is a test endpoint 54' };
+  }
+
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.admin)
+  @Get('test3')
+  test3(): { status: 'ok' } {
+    return { status: 'ok' };
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

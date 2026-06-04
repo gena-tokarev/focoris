@@ -8,18 +8,27 @@
   "nx": {
     "targets": {
       "build": {
-        "dependsOn": [
-          "^build"
-        ],
-        "executor": "@nx/js:swc",
+        "executor": "@nx/esbuild:esbuild",
         "outputs": [
           "{options.outputPath}"
         ],
         "options": {
+          "platform": "node",
+          "format": [
+            "cjs"
+          ],
+          "bundle": true,
           "main": "auth-api/src/main.ts",
           "tsConfig": "auth-api/tsconfig.app.json",
-          "outputPath": "dist/auth-api",
-          "swcrc": "auth-api/.swcrc"
+          "outputPath": "auth-api/dist",
+          "outputFileName": "auth-api/main.js",
+          "sourcemap": true,
+          "generatePackageJson": false,
+          "esbuildOptions": {
+            "outExtension": {
+              ".js": ".js"
+            }
+          }
         }
       },
       "prune-lockfile": {
@@ -29,8 +38,8 @@
         "cache": true,
         "executor": "@nx/js:prune-lockfile",
         "outputs": [
-          "{workspaceRoot}/dist/auth-api/package.json",
-          "{workspaceRoot}/dist/auth-api/pnpm-lock.yaml"
+          "{workspaceRoot}/auth-api/dist/package.json",
+          "{workspaceRoot}/auth-api/dist/pnpm-lock.yaml"
         ],
         "options": {
           "buildTarget": "build"
@@ -42,7 +51,7 @@
         ],
         "cache": true,
         "outputs": [
-          "{workspaceRoot}/dist/auth-api/workspace_modules"
+          "{workspaceRoot}/auth-api/dist/workspace_modules"
         ],
         "executor": "@nx/js:copy-workspace-modules",
         "options": {
@@ -60,12 +69,9 @@
         "continuous": true,
         "executor": "@nx/js:node",
         "defaultConfiguration": "development",
-        "dependsOn": [
-          "build"
-        ],
         "options": {
           "buildTarget": "@focoris/auth-api:build",
-          "runBuildTargetDependencies": true
+          "runBuildTargetDependencies": false
         },
         "configurations": {
           "development": {
@@ -112,6 +118,7 @@
     "@nestjs/platform-express": "^11.0.0",
     "@prisma/client": "^6.19.2",
     "bcryptjs": "^3.0.0",
+    "passport-jwt": "^4.0.1",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.0",
     "tslib": "^2.3.0",

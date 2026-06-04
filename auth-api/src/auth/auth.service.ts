@@ -1,16 +1,18 @@
 import {
   BadRequestException,
+  ConflictException,
+  Inject,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { Prisma } from '@prisma/client';
+import { Prisma, UserRole } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 import { createHash, randomUUID } from 'crypto';
-import { LoginRequestDto } from './dto/login-request.dto';
 import { LogoutRequestDto } from './dto/logout-request.dto';
 import { RefreshRequestDto } from './dto/refresh-request.dto';
+import { RegisterRequestDto } from './dto/register-request.dto';
 import {
   AuthErrorResponseDto,
   AuthErrorCode,
@@ -20,9 +22,11 @@ import {
   LogoutResponseDto,
   MeResponseDto,
   RefreshResponseDto,
+  RegisterResponseDto,
 } from './dto/auth-response.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuthJwtPayload, JwtTokenType } from '@focoris/auth-nest';
+import type { AppEnv } from '../config/config.validation';
 
 interface UserRecord {
   id: string;
@@ -30,6 +34,8 @@ interface UserRecord {
   passwordHash: string;
   roles: AuthUserDto['roles'];
 }
+
+export type AuthenticatedUser = UserRecord;
 
 interface RefreshSession {
   userId: string;
@@ -47,26 +53,26 @@ export class AuthService {
   private readonly refreshTtlSeconds: number;
 
   constructor(
-    private readonly prisma: PrismaService,
-    private readonly jwtService: JwtService,
-    configService: ConfigService,
+    @Inject(PrismaService) private readonly prisma: PrismaService,
+    @Inject(JwtService) private readonly jwtService: JwtService,
+    @Inject(ConfigService)
+    configService: ConfigService<AppEnv, true>,
   ) {
-    this.accessSecret = configService.getOrThrow<string>(
-      'AUTH_ACCESS_TOKEN_SECRET',
-    );
-    this.refreshSecret = configService.getOrThrow<string>(
-      'AUTH_REFRESH_TOKEN_SECRET',
-    );
-    this.accessTtlSeconds = configService.getOrThrow<number>(
+    this.accessSecret = configService.getOrThrow('AUTH_ACCESS_TOKEN_SECRET');
+    this.refreshSecret = configService.getOrThrow('AUTH_REFRESH_TOKEN_SECRET');
+    this.accessTtlSeconds = configService.getOrThrow(
       'AUTH_ACCESS_TOKEN_TTL_SECONDS',
     );
-    this.refreshTtlSeconds = configService.getOrThrow<number>(
+    this.refreshTtlSeconds = configService.getOrThrow(
       'AUTH_REFRESH_TOKEN_TTL_SECONDS',
     );
   }
 
-  async login(payload: LoginRequestDto): Promise<LoginResponseDto> {
-    if (!payload?.email || !payload?.password) {
+  async validateUserCredentials(
+    email?: string,
+    password?: string,
+  ): Promise<AuthenticatedUser | null> {
+    if (!email || !password) {
       throw new BadRequestException({
         statusCode: 400,
         code: AuthErrorCode.InvalidCredentials,
@@ -75,18 +81,50 @@ export class AuthService {
     }
 
     const user = await this.prisma.user.findUnique({
-      where: { email: payload.email.toLowerCase().trim() },
+      where: { email: email.toLowerCase().trim() },
     });
     const isPasswordValid =
-      !!user && bcrypt.compareSync(payload.password, user.passwordHash);
+      !!user && bcrypt.compareSync(password, user.passwordHash);
 
     if (!user || !isPasswordValid) {
-      throw new UnauthorizedException({
-        statusCode: 401,
-        code: AuthErrorCode.InvalidCredentials,
-        message: 'Invalid credentials',
+      return null;
+    }
+
+    return user;
+  }
+
+  async login(user: AuthenticatedUser): Promise<LoginResponseDto> {
+    const tokens = await this.issueTokenPair(user);
+    return {
+      user: this.toAuthUser(user),
+      tokens,
+    };
+  }
+
+  async register(payload: RegisterRequestDto): Promise<RegisterResponseDto> {
+    const email = payload?.email?.toLowerCase().trim();
+    const password = payload?.password;
+
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (existingUser) {
+      throw new ConflictException({
+        statusCode: 409,
+        code: AuthErrorCode.EmailAlreadyTaken,
+        message: 'Email is already taken',
       } satisfies AuthErrorResponseDto);
     }
+
+    const passwordHash = bcrypt.hashSync(password, 10);
+    const user = await this.prisma.user.create({
+      data: {
+        email,
+        passwordHash,
+        roles: [UserRole.member],
+      },
+    });
 
     const tokens = await this.issueTokenPair(user);
     return {

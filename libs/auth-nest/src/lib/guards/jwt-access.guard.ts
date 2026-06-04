@@ -1,9 +1,13 @@
 import {
   CanActivate,
   ExecutionContext,
+  Inject,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
+import type { AuthConfigEnv } from '../auth.config';
 import { AuthJwtPayload, JwtTokenType } from '../auth.types';
 
 interface JwtVerifier {
@@ -11,14 +15,14 @@ interface JwtVerifier {
 }
 
 interface EnvReader {
-  get<T = string>(key: string): T | undefined;
+  get<K extends keyof AuthConfigEnv>(key: K): AuthConfigEnv[K] | undefined;
 }
 
 @Injectable()
 export class JwtAccessGuard implements CanActivate {
   constructor(
-    protected readonly jwtService: JwtVerifier,
-    protected readonly configService: EnvReader,
+    @Inject(JwtService) protected readonly jwtService: JwtVerifier,
+    @Inject(ConfigService) protected readonly configService: EnvReader,
   ) {}
 
   canActivate(context: ExecutionContext): boolean {
@@ -38,12 +42,11 @@ export class JwtAccessGuard implements CanActivate {
   }
 
   protected onInvalidAccessToken(): never {
-    //werwerwsa
     throw new UnauthorizedException('Invalid access token');
   }
 
   private verifyAccessToken(token: string): AuthJwtPayload {
-    const secret = this.configService.get<string>('AUTH_ACCESS_TOKEN_SECRET');
+    const secret = this.configService.get('AUTH_ACCESS_TOKEN_SECRET');
     if (!secret) {
       this.onInvalidAccessToken();
     }

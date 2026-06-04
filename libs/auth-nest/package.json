@@ -2,7 +2,6 @@
   "name": "@focoris/auth-nest",
   "version": "0.0.1",
   "private": true,
-  "type": "commonjs",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "exports": {
@@ -13,19 +12,6 @@
   },
   "nx": {
     "targets": {
-      "build": {
-        "executor": "@nx/js:swc",
-        "outputs": [
-          "{options.outputPath}"
-        ],
-        "options": {
-          "main": "libs/auth-nest/src/index.ts",
-          "outputPath": "dist/libs/auth-nest",
-          "stripLeadingPaths": true,
-          "tsConfig": "libs/auth-nest/tsconfig.lib.json",
-          "swcrc": "libs/auth-nest/.swcrc"
-        }
-      },
       "test": {
         "options": {
           "passWithNoTests": true

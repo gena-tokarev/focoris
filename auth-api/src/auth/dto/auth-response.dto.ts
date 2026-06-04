@@ -19,6 +19,11 @@ export interface LoginResponseDto {
   tokens: AuthTokenPairDto;
 }
 
+export interface RegisterResponseDto {
+  user: AuthUserDto;
+  tokens: AuthTokenPairDto;
+}
+
 export interface RefreshResponseDto {
   tokens: AuthTokenPairDto;
 }
@@ -33,6 +38,7 @@ export interface MeResponseDto {
 
 export enum AuthErrorCode {
   InvalidCredentials = 'AUTH_INVALID_CREDENTIALS',
+  EmailAlreadyTaken = 'AUTH_EMAIL_ALREADY_TAKEN',
   InvalidRefreshToken = 'AUTH_INVALID_REFRESH_TOKEN',
   InvalidAccessToken = 'AUTH_INVALID_ACCESS_TOKEN',
   MissingBearerToken = 'AUTH_MISSING_BEARER_TOKEN',

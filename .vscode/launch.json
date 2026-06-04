@@ -65,7 +65,21 @@
       "skipFiles": ["<node_internals>/**"],
       "sourceMaps": true,
       "outFiles": [
-        "${workspaceFolder}/dist/auth-api/**/*.js",
+        "${workspaceFolder}/auth-api/dist/auth-api/**/*.js",
+        "!**/node_modules/**"
+      ]
+    },
+    {
+      "type": "node",
+      "request": "attach",
+      "name": "Attach @focoris/auth-api (9230)",
+      "address": "127.0.0.1",
+      "port": 9230,
+      "restart": true,
+      "skipFiles": ["<node_internals>/**"],
+      "sourceMaps": true,
+      "outFiles": [
+        "${workspaceFolder}/auth-api/dist/auth-api/**/*.js",
         "!**/node_modules/**"
       ]
     },

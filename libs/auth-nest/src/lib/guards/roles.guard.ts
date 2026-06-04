@@ -2,6 +2,7 @@ import {
   CanActivate,
   ExecutionContext,
   ForbiddenException,
+  Inject,
   Injectable,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
@@ -10,7 +11,7 @@ import { UserRole, AuthJwtPayload } from '../auth.types';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
-  constructor(private readonly reflector: Reflector) {}
+  constructor(@Inject(Reflector) private readonly reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
     const requiredRoles = this.reflector.getAllAndOverride<UserRole[]>(
@@ -29,7 +30,7 @@ export class RolesGuard implements CanActivate {
     const allowed = requiredRoles.some((role) => userRoles.includes(role));
 
     if (!allowed) {
-      throw new ForbiddenException('Insufficient role');
+      throw new ForbiddenException('Insufficient role 2');
     }
 
     return true;

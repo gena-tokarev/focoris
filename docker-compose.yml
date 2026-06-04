@@ -6,27 +6,11 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     ports:
-      - "${POSTGRES_PORT}:5432"
+      - '${POSTGRES_PORT}:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-
-  postgres-test:
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_TEST_DB}
-    ports:
-      - "${POSTGRES_TEST_PORT}:5432"
-    volumes:
-      - postgres_test_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_TEST_DB}"]
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}']
       interval: 5s
       timeout: 5s
       retries: 10
@@ -46,7 +30,7 @@ services:
       AUTH_ACCESS_TOKEN_TTL_SECONDS: ${AUTH_ACCESS_TOKEN_TTL_SECONDS}
       AUTH_REFRESH_TOKEN_TTL_SECONDS: ${AUTH_REFRESH_TOKEN_TTL_SECONDS}
     ports:
-      - "${AUTH_API_PORT}:3001"
+      - '${AUTH_API_PORT}:3001'
 
   skillbook-api:
     build:
@@ -56,7 +40,7 @@ services:
       PORT: ${SKILLBOOK_API_PORT}
       AUTH_ACCESS_TOKEN_SECRET: ${AUTH_ACCESS_TOKEN_SECRET}
     ports:
-      - "${SKILLBOOK_API_PORT}:3002"
+      - '${SKILLBOOK_API_PORT}:3002'
 
   gateway:
     build:
@@ -70,7 +54,7 @@ services:
       AUTH_API_URL: ${AUTH_API_URL}
       SKILL_BOOK_API_URL: ${SKILL_BOOK_API_URL}
     ports:
-      - "${GATEWAY_PORT}:3000"
+      - '${GATEWAY_PORT}:3000'
 
 volumes:
   postgres_data:

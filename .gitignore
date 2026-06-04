@@ -52,3 +52,5 @@ test-output
 auth-api/.env.test
 # E2E runtime artifacts
 auth-api-e2e/.tmp/
+
+__azurite_db_queue*

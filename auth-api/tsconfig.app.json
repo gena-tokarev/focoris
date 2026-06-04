@@ -4,6 +4,7 @@
     "outDir": "dist",
     "types": ["node"],
     "rootDir": "src",
+    "declaration": false,
     "tsBuildInfoFile": "dist/tsconfig.app.tsbuildinfo",
     "sourceMap": true,
     "inlineSources": true,
@@ -22,10 +23,5 @@
     "eslint.config.js",
     "eslint.config.cjs",
     "eslint.config.mjs"
-  ],
-  "references": [
-    {
-      "path": "../libs/auth-nest/tsconfig.lib.json"
-    }
   ]
 }
