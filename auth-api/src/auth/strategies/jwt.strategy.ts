@@ -1,19 +1,14 @@
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
 import { AuthJwtPayload, JwtTokenType } from '@focoris/auth-nest';
 import type { AppEnv } from '../../config/config.validation';
-import {
-  AuthErrorCode,
-  AuthErrorResponseDto,
-} from '../dto/auth-response.dto';
+import { AuthErrorCode, AuthErrorResponseDto } from '../dto/auth-response.dto';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor(
-    @Inject(ConfigService) configService: ConfigService<AppEnv, true>,
-  ) {
+  constructor(configService: ConfigService<AppEnv, true>) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,

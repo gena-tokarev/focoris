@@ -1,7 +1,6 @@
 import {
   BadRequestException,
   ConflictException,
-  Inject,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -53,9 +52,8 @@ export class AuthService {
   private readonly refreshTtlSeconds: number;
 
   constructor(
-    @Inject(PrismaService) private readonly prisma: PrismaService,
-    @Inject(JwtService) private readonly jwtService: JwtService,
-    @Inject(ConfigService)
+    private readonly prisma: PrismaService,
+    private readonly jwtService: JwtService,
     configService: ConfigService<AppEnv, true>,
   ) {
     this.accessSecret = configService.getOrThrow('AUTH_ACCESS_TOKEN_SECRET');

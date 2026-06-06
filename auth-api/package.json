@@ -8,27 +8,19 @@
   "nx": {
     "targets": {
       "build": {
-        "executor": "@nx/esbuild:esbuild",
+        "dependsOn": [
+          "^build"
+        ],
+        "executor": "@nx/js:tsc",
         "outputs": [
           "{options.outputPath}"
         ],
         "options": {
-          "platform": "node",
-          "format": [
-            "cjs"
-          ],
-          "bundle": true,
           "main": "auth-api/src/main.ts",
           "tsConfig": "auth-api/tsconfig.app.json",
           "outputPath": "auth-api/dist",
-          "outputFileName": "auth-api/main.js",
-          "sourcemap": true,
-          "generatePackageJson": false,
-          "esbuildOptions": {
-            "outExtension": {
-              ".js": ".js"
-            }
-          }
+          "outputFileName": "src/main.js",
+          "generatePackageJson": false
         }
       },
       "prune-lockfile": {
@@ -71,7 +63,7 @@
         "defaultConfiguration": "development",
         "options": {
           "buildTarget": "@focoris/auth-api:build",
-          "runBuildTargetDependencies": false
+          "runBuildTargetDependencies": true
         },
         "configurations": {
           "development": {

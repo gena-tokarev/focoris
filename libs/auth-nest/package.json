@@ -2,16 +2,30 @@
   "name": "@focoris/auth-nest",
   "version": "0.0.1",
   "private": true,
-  "main": "./src/index.ts",
+  "main": "./src/index.js",
   "types": "./src/index.ts",
   "exports": {
     ".": {
+      "@focoris/source": "./src/index.ts",
       "types": "./src/index.ts",
-      "default": "./src/index.ts"
+      "default": "./src/index.js"
     }
   },
   "nx": {
     "targets": {
+      "build": {
+        "executor": "@nx/js:tsc",
+        "outputs": [
+          "{options.outputPath}"
+        ],
+        "options": {
+          "main": "libs/auth-nest/src/index.ts",
+          "tsConfig": "libs/auth-nest/tsconfig.lib.json",
+          "outputPath": "libs/auth-nest/dist",
+          "outputFileName": "src/index.js",
+          "generatePackageJson": true
+        }
+      },
       "test": {
         "options": {
           "passWithNoTests": true

@@ -4,7 +4,6 @@ import {
   Get,
   HttpCode,
   HttpStatus,
-  Inject,
   Post,
   Req,
   UseGuards,
@@ -29,7 +28,7 @@ import type { AuthenticatedUser } from './auth.service';
 
 @Controller('auth')
 export class AuthController {
-  constructor(@Inject(AuthService) private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService) {}
 
   @Post('register')
   register(@Body() payload: RegisterRequestDto): Promise<RegisterResponseDto> {
@@ -69,7 +68,7 @@ export class AuthController {
 
   @Get('test2')
   test2() {
-    return { status: 'ok', message: 'This is a test endpoint 54' };
+    return { status: 'ok', message: 'This is a test endpoint 3' };
   }
 
   @UseGuards(RolesGuard)

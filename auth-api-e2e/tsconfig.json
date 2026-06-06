@@ -3,9 +3,10 @@
   "compilerOptions": {
     "outDir": "out-tsc/@focoris/auth-api-e2e",
     "esModuleInterop": true,
+    "types": ["node", "jest"],
     "noUnusedLocals": false,
     "noImplicitAny": false
   },
-  "include": ["jest.config.ts", "src/**/*.ts"],
+  "include": ["jest.config.ts", "jest.config.cts", "src/**/*.ts"],
   "references": []
 }

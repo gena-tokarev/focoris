@@ -64,8 +64,12 @@
       "internalConsoleOptions": "neverOpen",
       "skipFiles": ["<node_internals>/**"],
       "sourceMaps": true,
+      "sourceMapPathOverrides": {
+        "${workspaceFolder}/libs/auth-nest/dist/src/*": "${workspaceFolder}/libs/auth-nest/src/*"
+      },
       "outFiles": [
-        "${workspaceFolder}/auth-api/dist/auth-api/**/*.js",
+        "${workspaceFolder}/auth-api/dist/**/*.js",
+        "${workspaceFolder}/libs/auth-nest/dist/**/*.js",
         "!**/node_modules/**"
       ]
     },
@@ -78,8 +82,12 @@
       "restart": true,
       "skipFiles": ["<node_internals>/**"],
       "sourceMaps": true,
+      "sourceMapPathOverrides": {
+        "${workspaceFolder}/libs/auth-nest/dist/src/*": "${workspaceFolder}/libs/auth-nest/src/*"
+      },
       "outFiles": [
-        "${workspaceFolder}/auth-api/dist/auth-api/**/*.js",
+        "${workspaceFolder}/auth-api/dist/**/*.js",
+        "${workspaceFolder}/libs/auth-nest/dist/**/*.js",
         "!**/node_modules/**"
       ]
     },
