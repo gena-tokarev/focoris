@@ -8,31 +8,30 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { RefreshRequestDto } from './dto/refresh-request.dto';
-import { LogoutRequestDto } from './dto/logout-request.dto';
-import { RegisterRequestDto } from './dto/register-request.dto';
-import { UserRole } from './dto/auth-response.dto';
-import type {
+import { CurrentUser, Roles, RolesGuard } from '@focoris/auth-nest';
+import type { AuthJwtPayload } from '@focoris/auth-nest';
+import { AuthCoreService, type AuthenticatedUser } from './auth-core.service';
+import {
   LoginResponseDto,
   LogoutResponseDto,
   MeResponseDto,
   RefreshResponseDto,
   RegisterResponseDto,
+  UserRole,
 } from './dto/auth-response.dto';
-import { CurrentUser, Roles, RolesGuard } from '@focoris/auth-nest';
-import type { AuthJwtPayload } from '@focoris/auth-nest';
+import { LogoutRequestDto } from './dto/logout-request.dto';
+import { RefreshRequestDto } from './dto/refresh-request.dto';
+import { RegisterRequestDto } from './dto/register-request.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { LocalAuthGuard } from './guards/local-auth.guard';
-import type { AuthenticatedUser } from './auth.service';
 
 @Controller('auth')
-export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+export class AuthCoreController {
+  constructor(private readonly authCoreService: AuthCoreService) {}
 
   @Post('register')
   register(@Body() payload: RegisterRequestDto): Promise<RegisterResponseDto> {
-    return this.authService.register(payload);
+    return this.authCoreService.register(payload);
   }
 
   @UseGuards(LocalAuthGuard)
@@ -40,24 +39,24 @@ export class AuthController {
   login(
     @Req() request: { user: AuthenticatedUser },
   ): Promise<LoginResponseDto> {
-    return this.authService.login(request.user);
+    return this.authCoreService.login(request.user);
   }
 
   @Post('refresh')
   refresh(@Body() payload: RefreshRequestDto): Promise<RefreshResponseDto> {
-    return this.authService.refresh(payload);
+    return this.authCoreService.refresh(payload);
   }
 
   @Post('logout')
   @HttpCode(HttpStatus.OK)
   logout(@Body() payload: LogoutRequestDto): Promise<LogoutResponseDto> {
-    return this.authService.logout(payload);
+    return this.authCoreService.logout(payload);
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('me')
   me(@CurrentUser() user: AuthJwtPayload): Promise<MeResponseDto> {
-    return this.authService.me(user.sub);
+    return this.authCoreService.me(user.sub);
   }
 
   @UseGuards(JwtAuthGuard)

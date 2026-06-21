@@ -12,14 +12,21 @@ enum UserRole {
   member
 }
 
+enum AuthProvider {
+  local
+  google
+  apple
+  meta
+}
+
 model User {
-  id              String           @id @default(uuid())
-  email           String           @unique
-  passwordHash    String
-  roles           UserRole[]
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
-  refreshSessions RefreshSession[]
+  id                 String             @id @default(uuid())
+  email              String
+  roles              UserRole[]
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  refreshSessions    RefreshSession[]
+  externalIdentities ExternalIdentity[]
 }
 
 model RefreshSession {
@@ -35,4 +42,22 @@ model RefreshSession {
 
   @@index([userId])
   @@index([expiresAt])
+}
+
+model ExternalIdentity {
+  id             String       @id @default(uuid())
+  provider       AuthProvider
+  providerUserId String
+  email          String?
+  emailVerified  Boolean      @default(false)
+  displayName    String?
+  passwordHash   String?
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@unique([provider, providerUserId])
+  @@index([userId])
+  @@index([email])
 }

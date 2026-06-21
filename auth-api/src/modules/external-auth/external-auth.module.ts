@@ -1,0 +1,16 @@
+import { Module } from '@nestjs/common';
+import { PassportModule } from '@nestjs/passport';
+import { IdentityModule } from '../identity/identity.module';
+import { TokenModule } from '../token/token.module';
+import { ExternalAuthController } from './external-auth.controller';
+import { ExternalAuthService } from './external-auth.service';
+import { GoogleAuthGuard } from './google/google-auth.guard';
+import { GoogleStrategy } from './google/google.strategy';
+
+@Module({
+  imports: [PassportModule, IdentityModule, TokenModule],
+  controllers: [ExternalAuthController],
+  providers: [ExternalAuthService, GoogleAuthGuard, GoogleStrategy],
+  exports: [ExternalAuthService],
+})
+export class ExternalAuthModule {}

@@ -3,24 +3,25 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
+import { PassportStrategy } from '@nestjs/passport';
 import { plainToInstance } from 'class-transformer';
 import { validateSync } from 'class-validator';
-import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-local';
-import { AuthService, AuthenticatedUser } from '../auth.service';
+import { IdentityService } from '../../modules/identity/identity.service';
+import type { IdentityUser } from '../../modules/identity/identity.types';
 import { AuthErrorCode, AuthErrorResponseDto } from '../dto/auth-response.dto';
 import { LoginRequestDto } from '../dto/login-request.dto';
 
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy) {
-  constructor(private readonly authService: AuthService) {
+  constructor(private readonly identityService: IdentityService) {
     super({
       usernameField: 'email',
       passwordField: 'password',
     });
   }
 
-  async validate(email: string, password: string): Promise<AuthenticatedUser> {
+  async validate(email: string, password: string): Promise<IdentityUser> {
     const payload = plainToInstance(LoginRequestDto, { email, password });
     const errors = validateSync(payload);
 
@@ -32,7 +33,7 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
       } satisfies AuthErrorResponseDto);
     }
 
-    const user = await this.authService.validateUserCredentials(
+    const user = await this.identityService.validateUserCredentials(
       email,
       password,
     );

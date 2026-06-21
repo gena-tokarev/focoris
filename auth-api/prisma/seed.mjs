@@ -1,4 +1,4 @@
-import { PrismaClient, UserRole } from '@prisma/client';
+import { AuthProvider, PrismaClient, UserRole } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
@@ -10,13 +10,39 @@ async function main() {
   await prisma.user.upsert({
     where: { email },
     update: {
-      passwordHash,
       roles: [UserRole.admin],
+      externalIdentities: {
+        upsert: {
+          where: {
+            provider_providerUserId: {
+              provider: AuthProvider.local,
+              providerUserId: email,
+            },
+          },
+          update: {
+            passwordHash,
+            email,
+          },
+          create: {
+            provider: AuthProvider.local,
+            providerUserId: email,
+            email,
+            passwordHash,
+          },
+        },
+      },
     },
     create: {
       email,
-      passwordHash,
       roles: [UserRole.admin],
+      externalIdentities: {
+        create: {
+          provider: AuthProvider.local,
+          providerUserId: email,
+          email,
+          passwordHash,
+        },
+      },
     },
   });
 }

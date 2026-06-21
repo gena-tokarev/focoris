@@ -63,6 +63,7 @@
         "defaultConfiguration": "development",
         "options": {
           "buildTarget": "@focoris/auth-api:build",
+          "watch": true,
           "runBuildTargetDependencies": true
         },
         "configurations": {
@@ -111,6 +112,7 @@
     "@prisma/client": "^6.19.2",
     "bcryptjs": "^3.0.0",
     "passport-jwt": "^4.0.1",
+    "redis": "^6.0.0",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.0",
     "tslib": "^2.3.0",
