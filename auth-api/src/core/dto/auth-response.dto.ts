@@ -53,6 +53,8 @@ export enum AuthErrorCode {
   InvalidRefreshToken = 'AUTH_INVALID_REFRESH_TOKEN',
   InvalidAccessToken = 'AUTH_INVALID_ACCESS_TOKEN',
   MissingBearerToken = 'AUTH_MISSING_BEARER_TOKEN',
+  InvalidPasskeyRequest = 'AUTH_INVALID_PASSKEY_REQUEST',
+  PasskeyRegistrationNotAllowed = 'AUTH_PASSKEY_REGISTRATION_NOT_ALLOWED',
   NotImplemented = 'AUTH_NOT_IMPLEMENTED',
 }
 

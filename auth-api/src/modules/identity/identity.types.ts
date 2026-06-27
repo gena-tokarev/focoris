@@ -1,4 +1,4 @@
-import { AuthProvider } from '@prisma/client/wasm';
+import { AuthProvider } from '@prisma/client';
 import type { AuthUserDto, UserRole } from '../../core/dto/auth-response.dto';
 
 export interface IdentityUser {

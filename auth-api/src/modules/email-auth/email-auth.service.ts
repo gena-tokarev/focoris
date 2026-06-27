@@ -1,5 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { AuthProvider } from '@prisma/client';
+import { Injectable } from '@nestjs/common';
 import { createHash, randomBytes, randomInt } from 'crypto';
 import { IdentityService } from '../identity/identity.service';
 import { TokenService } from '../token/token.service';
@@ -7,12 +6,11 @@ import { RequestEmailLoginDto } from '../../core/dto/request-email-login.dto';
 import { VerifyEmailCodeDto } from '../../core/dto/verify-email-code.dto';
 import { VerifyMagicLinkDto } from '../../core/dto/verify-magic-link.dto';
 import {
-  AuthErrorCode,
-  AuthErrorResponseDto,
   LoginResponseDto,
   RequestEmailLoginResponseDto,
 } from '../../core/dto/auth-response.dto';
 import { EmailLoginChallengeStore } from './email-login-challenge.store';
+import { EmailAuthVerificationService } from './email-auth-verification.service';
 
 @Injectable()
 export class EmailAuthService {
@@ -22,6 +20,7 @@ export class EmailAuthService {
     private readonly identityService: IdentityService,
     private readonly tokenService: TokenService,
     private readonly emailLoginChallengeStore: EmailLoginChallengeStore,
+    private readonly emailAuthVerificationService: EmailAuthVerificationService,
   ) {}
 
   async requestEmailLogin(
@@ -59,63 +58,15 @@ export class EmailAuthService {
   async verifyEmailCode(
     payload: VerifyEmailCodeDto,
   ): Promise<LoginResponseDto> {
-    const email = await this.emailLoginChallengeStore.consumeByCode(
-      this.identityService.normalizeEmail(payload.email),
-      this.hashValue(payload.code.trim()),
-    );
-
-    if (!email) {
-      throw this.createInvalidChallengeError();
-    }
-
-    const user = await this.findOrCreateLocalEmailUser(email);
-
+    const user = await this.emailAuthVerificationService.verifyEmailCode(payload);
     return this.tokenService.login(user);
   }
 
   async verifyMagicLink(
     payload: VerifyMagicLinkDto,
   ): Promise<LoginResponseDto> {
-    const email = await this.emailLoginChallengeStore.consumeByLinkToken(
-      this.hashValue(payload.token.trim()),
-    );
-
-    if (!email) {
-      throw this.createInvalidChallengeError();
-    }
-
-    const user = await this.findOrCreateLocalEmailUser(email);
-
+    const user = await this.emailAuthVerificationService.verifyMagicLink(payload);
     return this.tokenService.login(user);
-  }
-
-  private async findOrCreateLocalEmailUser(email: string) {
-    const existingUser = await this.identityService.findUserByIdentity(
-      AuthProvider.local,
-      email,
-    );
-
-    if (existingUser) {
-      return existingUser;
-    }
-
-    return this.identityService.createUserWithIdentity({
-      email,
-      identity: {
-        provider: AuthProvider.local,
-        providerUserId: email,
-        email,
-        emailVerified: true,
-      },
-    });
-  }
-
-  private createInvalidChallengeError(): UnauthorizedException {
-    return new UnauthorizedException({
-      statusCode: 401,
-      code: AuthErrorCode.InvalidEmailLoginChallenge,
-      message: 'Invalid or expired email login challenge',
-    } satisfies AuthErrorResponseDto);
   }
 
   private hashValue(value: string): string {

@@ -62,6 +62,20 @@ export class TokenService {
     };
   }
 
+  async getUserForAccessToken(token?: string): Promise<IdentityUser | null> {
+    if (!token) {
+      return null;
+    }
+
+    const parsedToken = this.verifyToken(token, JwtTokenType.Access, false);
+
+    if (!parsedToken) {
+      return null;
+    }
+
+    return this.identityService.findUserById(parsedToken.sub);
+  }
+
   async issueTokenPair(
     user: IdentityUser,
     tx: Prisma.TransactionClient | PrismaService = this.prisma,

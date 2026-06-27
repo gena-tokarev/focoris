@@ -10,6 +10,9 @@ export const envSchema = z.object({
   GOOGLE_CLIENT_ID: z.string().min(1),
   GOOGLE_CLIENT_SECRET: z.string().min(1),
   GOOGLE_CALLBACK_URL: z.string().url(),
+  PASSKEY_RP_ID: z.string().min(1),
+  PASSKEY_RP_NAME: z.string().min(1),
+  PASSKEY_ALLOWED_ORIGINS: z.string().min(1),
 });
 
 export type AppEnv = z.infer<typeof envSchema>;

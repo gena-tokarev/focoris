@@ -2,21 +2,21 @@ import axios from 'axios';
 import {
   cleanupAuthFixtureUsers,
   createAuthFixtureUser,
-  disconnectFixtures,
 } from '../support/fixtures';
 
-describe('Auth API flow', () => {
+const EMAIL_FIXTURE_PREFIX = 'e2e-email';
+
+describe('Email and Token Auth API flow', () => {
   beforeEach(async () => {
-    await cleanupAuthFixtureUsers();
+    await cleanupAuthFixtureUsers(EMAIL_FIXTURE_PREFIX);
   });
 
   afterAll(async () => {
-    await cleanupAuthFixtureUsers();
-    await disconnectFixtures();
+    await cleanupAuthFixtureUsers(EMAIL_FIXTURE_PREFIX);
   });
 
   it('should login, return profile, rotate refresh token, and reject revoked refresh token', async () => {
-    const fixtureUser = await createAuthFixtureUser();
+    const fixtureUser = await createAuthFixtureUser(EMAIL_FIXTURE_PREFIX);
 
     const login = await axios.post('/api/auth/login', {
       email: fixtureUser.email,

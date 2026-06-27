@@ -11,7 +11,7 @@ async function main() {
     where: { email },
     update: {
       roles: [UserRole.admin],
-      externalIdentities: {
+      userIdentities: {
         upsert: {
           where: {
             provider_providerUserId: {
@@ -35,7 +35,7 @@ async function main() {
     create: {
       email,
       roles: [UserRole.admin],
-      externalIdentities: {
+      userIdentities: {
         create: {
           provider: AuthProvider.local,
           providerUserId: email,

@@ -1,4 +1,4 @@
-import { PrismaClient, UserRole } from '@prisma/client';
+import { AuthProvider, PrismaClient, UserRole } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { randomUUID } from 'crypto';
 
@@ -9,27 +9,37 @@ export interface AuthFixtureUser {
   password: string;
 }
 
-export async function createAuthFixtureUser(): Promise<AuthFixtureUser> {
+export async function createAuthFixtureUser(
+  prefix = 'e2e',
+): Promise<AuthFixtureUser> {
   const password = 'Test1234!';
-  const email = `e2e+${randomUUID()}@focoris.local`;
+  const email = `${prefix}+${randomUUID()}@focoris.local`;
   const passwordHash = bcrypt.hashSync(password, 10);
 
   await prisma.user.create({
     data: {
       email,
-      passwordHash,
       roles: [UserRole.admin],
+      userIdentities: {
+        create: {
+          provider: AuthProvider.local,
+          providerUserId: email,
+          email,
+          emailVerified: true,
+          passwordHash,
+        },
+      },
     },
   });
 
   return { email, password };
 }
 
-export async function cleanupAuthFixtureUsers() {
+export async function cleanupAuthFixtureUsers(prefix = 'e2e') {
   await prisma.user.deleteMany({
     where: {
       email: {
-        startsWith: 'e2e+',
+        startsWith: `${prefix}+`,
       },
     },
   });

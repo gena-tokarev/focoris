@@ -4,6 +4,7 @@ import { RolesGuard } from '@focoris/auth-nest';
 import { EmailAuthModule } from '../modules/email-auth/email-auth.module';
 import { ExternalAuthModule } from '../modules/external-auth/external-auth.module';
 import { IdentityModule } from '../modules/identity/identity.module';
+import { PasskeyAuthModule } from '../modules/passkey/passkey-auth.module';
 import { TokenModule } from '../modules/token/token.module';
 import { AuthCoreController } from './auth-core.controller';
 import { AuthCoreService } from './auth-core.service';
@@ -17,6 +18,7 @@ import { LocalStrategy } from './strategies/local.strategy';
     EmailAuthModule,
     ExternalAuthModule,
     IdentityModule,
+    PasskeyAuthModule,
     TokenModule,
   ],
   controllers: [AuthCoreController],

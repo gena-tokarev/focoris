@@ -3,7 +3,7 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { AuthProvider, UserRole, type ExternalIdentity } from '@prisma/client';
+import { AuthProvider, Prisma, UserRole } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 import { PrismaService } from '../../prisma/prisma.service';
 import {
@@ -71,6 +71,12 @@ export class IdentityService {
     return user;
   }
 
+  async findUserByEmail(email: string): Promise<IdentityUser | null> {
+    return this.prisma.user.findFirst({
+      where: { email: this.normalizeEmail(email) },
+    });
+  }
+
   async createUserWithIdentity(
     input: CreateUserWithIdentityInput,
   ): Promise<IdentityUser> {
@@ -81,7 +87,7 @@ export class IdentityService {
       data: {
         email,
         roles: input.roles ?? [UserRole.member],
-        externalIdentities: {
+        userIdentities: {
           create: {
             provider: input.identity.provider,
             providerUserId,
@@ -110,8 +116,13 @@ export class IdentityService {
   private findIdentityWithUser(
     provider: AuthProvider,
     providerUserId: string,
-  ): Promise<(ExternalIdentity & { user: IdentityUser | null }) | null> {
-    return this.prisma.externalIdentity.findUnique({
+  ): Promise<
+    | (Prisma.UserIdentityGetPayload<{ include: { user: true } }> & {
+        user: IdentityUser | null;
+      })
+    | null
+  > {
+    return this.prisma.userIdentity.findUnique({
       where: {
         provider_providerUserId: {
           provider,

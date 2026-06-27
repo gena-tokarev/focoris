@@ -17,16 +17,17 @@ enum AuthProvider {
   google
   apple
   meta
+  passkey
 }
 
 model User {
-  id                 String             @id @default(uuid())
-  email              String
-  roles              UserRole[]
-  createdAt          DateTime           @default(now())
-  updatedAt          DateTime           @updatedAt
-  refreshSessions    RefreshSession[]
-  externalIdentities ExternalIdentity[]
+  id              String           @id @default(uuid())
+  email           String
+  roles           UserRole[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  refreshSessions RefreshSession[]
+  userIdentities  UserIdentity[]
 }
 
 model RefreshSession {
@@ -44,7 +45,7 @@ model RefreshSession {
   @@index([expiresAt])
 }
 
-model ExternalIdentity {
+model UserIdentity {
   id             String       @id @default(uuid())
   provider       AuthProvider
   providerUserId String
@@ -54,10 +55,27 @@ model ExternalIdentity {
   passwordHash   String?
   userId         String
   user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  passkeyCredentials PasskeyCredential[]
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 
   @@unique([provider, providerUserId])
   @@index([userId])
   @@index([email])
+}
+
+model PasskeyCredential {
+  id               String       @id @default(uuid())
+  userIdentityId   String
+  userIdentity     UserIdentity @relation(fields: [userIdentityId], references: [id], onDelete: Cascade)
+  credentialId     String       @unique
+  publicKey        Bytes
+  counter          Int
+  transports       String[]     @default([])
+  deviceType       String?
+  backedUp         Boolean?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  @@index([userIdentityId])
 }
