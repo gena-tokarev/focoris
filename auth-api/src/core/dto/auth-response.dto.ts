@@ -52,6 +52,8 @@ export enum AuthErrorCode {
   InvalidEmailLoginChallenge = 'AUTH_INVALID_EMAIL_LOGIN_CHALLENGE',
   InvalidRefreshToken = 'AUTH_INVALID_REFRESH_TOKEN',
   InvalidAccessToken = 'AUTH_INVALID_ACCESS_TOKEN',
+  InvalidExternalAuthRequest = 'AUTH_INVALID_EXTERNAL_AUTH_REQUEST',
+  InvalidExternalAuthCode = 'AUTH_INVALID_EXTERNAL_AUTH_CODE',
   MissingBearerToken = 'AUTH_MISSING_BEARER_TOKEN',
   InvalidPasskeyRequest = 'AUTH_INVALID_PASSKEY_REQUEST',
   PasskeyRegistrationNotAllowed = 'AUTH_PASSKEY_REGISTRATION_NOT_ALLOWED',

@@ -1,22 +1,91 @@
-import { Controller, Get, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Query,
+  Req,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import type { LoginResponseDto } from '../../core/dto/auth-response.dto';
 import type { IdentityUser } from '../identity/identity.types';
+import { GoogleAuthCodeExchangeDto } from './dto/google-auth-code-exchange.dto';
+import type { GoogleAuthStartDto } from './dto/google-auth-start.dto';
+import { ExternalAuthRedirectService } from './external-auth-redirect.service';
 import { ExternalAuthService } from './external-auth.service';
 import { GoogleAuthGuard } from './google/google-auth.guard';
 
+interface RedirectResponse {
+  redirect(url: string): void;
+}
+
+interface GoogleCallbackRequest {
+  user: IdentityUser | null;
+  query: {
+    state?: string;
+    error?: string;
+  };
+  externalAuthError?: unknown;
+}
+
 @Controller('auth')
 export class ExternalAuthController {
-  constructor(private readonly externalAuthService: ExternalAuthService) {}
+  constructor(
+    private readonly externalAuthService: ExternalAuthService,
+    private readonly externalAuthRedirectService: ExternalAuthRedirectService,
+  ) {}
 
   @UseGuards(GoogleAuthGuard)
   @Get('google')
-  googleLogin(): void {}
+  googleLogin(@Query() _query: GoogleAuthStartDto): void {}
 
   @UseGuards(GoogleAuthGuard)
   @Get('google/callback')
-  googleCallback(
-    @Req() request: { user: IdentityUser },
+  async googleCallback(
+    @Req() request: GoogleCallbackRequest,
+    @Res() response: RedirectResponse,
+  ): Promise<void> {
+    const redirectContext = this.externalAuthRedirectService.parseState(
+      request.query.state,
+    );
+
+    if (request.user) {
+      const code = await this.externalAuthService.createCompletionCode(
+        request.user,
+        redirectContext.redirectUri,
+        redirectContext.platform,
+      );
+
+      response.redirect(
+        this.externalAuthRedirectService.createSuccessRedirect(
+          redirectContext,
+          code,
+        ),
+      );
+      return;
+    }
+
+    response.redirect(
+      this.externalAuthRedirectService.createErrorRedirect(
+        redirectContext,
+        this.getCallbackErrorCode(request),
+      ),
+    );
+  }
+
+  @Post('google/exchange')
+  exchangeGoogleCode(
+    @Body() payload: GoogleAuthCodeExchangeDto,
   ): Promise<LoginResponseDto> {
-    return this.externalAuthService.login(request.user);
+    return this.externalAuthService.exchangeCompletionCode(payload.code);
+  }
+
+  private getCallbackErrorCode(request: GoogleCallbackRequest): string {
+    if (request.query.error === 'access_denied') {
+      return 'oauth_cancelled';
+    }
+
+    return 'oauth_failed';
   }
 }
