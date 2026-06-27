@@ -18,7 +18,7 @@ describe('Email and Token Auth API flow', () => {
   it('should login, return profile, rotate refresh token, and reject revoked refresh token', async () => {
     const fixtureUser = await createAuthFixtureUser(EMAIL_FIXTURE_PREFIX);
 
-    const login = await axios.post('/api/auth/login', {
+    const login = await axios.post('/api/auth/email/login', {
       email: fixtureUser.email,
       password: fixtureUser.password,
     });

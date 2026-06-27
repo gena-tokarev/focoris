@@ -13,15 +13,14 @@ import {
   AuthErrorCode,
   AuthErrorResponseDto,
   AuthTokenPairDto,
-  LoginResponseDto,
   LogoutResponseDto,
-  RefreshResponseDto,
 } from '../../core/dto/auth-response.dto';
 import { LogoutRequestDto } from '../../core/dto/logout-request.dto';
 import { RefreshRequestDto } from '../../core/dto/refresh-request.dto';
 import { IdentityService } from '../identity/identity.service';
 import type { IdentityUser } from '../identity/identity.types';
 import { PrismaService } from '../../prisma/prisma.service';
+import type { AuthenticatedSession } from '../session/session.types';
 
 interface RefreshSession {
   userId: string;
@@ -53,12 +52,14 @@ export class TokenService {
     );
   }
 
-  async login(user: IdentityUser): Promise<LoginResponseDto> {
-    const tokens = await this.issueTokenPair(user);
+  async login(user: IdentityUser): Promise<AuthenticatedSession> {
+    return this.createSession(user);
+  }
 
+  async createSession(user: IdentityUser): Promise<AuthenticatedSession> {
     return {
       user: this.identityService.toAuthUser(user),
-      tokens,
+      tokens: await this.issueTokenPair(user),
     };
   }
 
@@ -133,7 +134,7 @@ export class TokenService {
     };
   }
 
-  async refresh(payload: RefreshRequestDto): Promise<RefreshResponseDto> {
+  async refresh(payload: RefreshRequestDto): Promise<AuthTokenPairDto> {
     if (!payload?.refreshToken) {
       throw new BadRequestException({
         statusCode: 400,
@@ -174,9 +175,7 @@ export class TokenService {
       },
     );
 
-    return {
-      tokens: rotatedTokens,
-    };
+    return rotatedTokens;
   }
 
   async logout(payload: LogoutRequestDto): Promise<LogoutResponseDto> {

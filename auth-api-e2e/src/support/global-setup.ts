@@ -3,6 +3,7 @@ import { spawn } from 'child_process';
 import { config as loadEnv } from 'dotenv';
 import { mkdirSync, writeFileSync } from 'fs';
 import { join } from 'path';
+import { GenericContainer } from 'testcontainers';
 import { PostgreSqlContainer } from '@testcontainers/postgresql';
 
 loadEnv({ path: 'auth-api-e2e/.env' });
@@ -48,19 +49,25 @@ module.exports = async function () {
   const pgPassword = process.env.TEST_DB_PASSWORD ?? 'focoris';
   const pgDb = process.env.TEST_DB_NAME ?? 'focoris_auth_test';
   const pgImage = process.env.TEST_DB_IMAGE ?? 'postgres:16-alpine';
+  const redisImage = process.env.TEST_REDIS_IMAGE ?? 'redis:7-alpine';
 
   const postgres = await new PostgreSqlContainer(pgImage)
     .withUsername(pgUser)
     .withPassword(pgPassword)
     .withDatabase(pgDb)
     .start();
+  const redis = await new GenericContainer(redisImage)
+    .withExposedPorts(6379)
+    .start();
 
   const dbUrl = `${postgres.getConnectionUri()}?schema=public`;
+  const redisUrl = `redis://${redis.getHost()}:${redis.getMappedPort(6379)}`;
   const { NODE_OPTIONS, VSCODE_INSPECTOR_OPTIONS, ...baseEnv } = process.env;
   const commandEnv = {
     ...baseEnv,
     DATABASE_URL: dbUrl,
     PORT: String(authApiPort),
+    REDIS_URL: redisUrl,
   };
 
   await runCommand(
@@ -93,6 +100,8 @@ module.exports = async function () {
       {
         databaseUrl: dbUrl,
         postgresContainerId: postgres.getId(),
+        redisContainerId: redis.getId(),
+        redisUrl,
       },
       null,
       2,
@@ -100,6 +109,7 @@ module.exports = async function () {
   );
 
   process.env.DATABASE_URL = dbUrl;
+  process.env.REDIS_URL = redisUrl;
 
   // Hint: Use `globalThis` to pass variables to global teardown.
   globalThis.__TEARDOWN_MESSAGE__ = '\nTearing down...\n';

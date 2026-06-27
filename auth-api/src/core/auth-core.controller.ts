@@ -6,51 +6,60 @@ import {
   HttpStatus,
   Post,
   Req,
+  UseInterceptors,
   UseGuards,
 } from '@nestjs/common';
 import { CurrentUser, Roles, RolesGuard } from '@focoris/auth-nest';
 import type { AuthJwtPayload } from '@focoris/auth-nest';
-import { AuthCoreService, type AuthenticatedUser } from './auth-core.service';
+import { AuthCoreService } from './auth-core.service';
 import {
-  LoginResponseDto,
+  AuthTokenPairDto,
   LogoutResponseDto,
   MeResponseDto,
-  RefreshResponseDto,
-  RegisterResponseDto,
   UserRole,
 } from './dto/auth-response.dto';
 import { LogoutRequestDto } from './dto/logout-request.dto';
 import { RefreshRequestDto } from './dto/refresh-request.dto';
-import { RegisterRequestDto } from './dto/register-request.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import { LocalAuthGuard } from './guards/local-auth.guard';
+import { AuthSessionService } from '../modules/session/session.service';
+import { AuthLogoutInterceptor } from '../modules/session/interceptors/auth-logout.interceptor';
+import { AuthRefreshInterceptor } from '../modules/session/interceptors/auth-refresh.interceptor';
+import type { AuthRequestLike } from '../modules/session/session.types';
 
 @Controller('auth')
 export class AuthCoreController {
-  constructor(private readonly authCoreService: AuthCoreService) {}
-
-  @Post('register')
-  register(@Body() payload: RegisterRequestDto): Promise<RegisterResponseDto> {
-    return this.authCoreService.register(payload);
-  }
-
-  @UseGuards(LocalAuthGuard)
-  @Post('login')
-  login(
-    @Req() request: { user: AuthenticatedUser },
-  ): Promise<LoginResponseDto> {
-    return this.authCoreService.login(request.user);
-  }
+  constructor(
+    private readonly authCoreService: AuthCoreService,
+    private readonly authSessionService: AuthSessionService,
+  ) {}
 
   @Post('refresh')
-  refresh(@Body() payload: RefreshRequestDto): Promise<RefreshResponseDto> {
-    return this.authCoreService.refresh(payload);
+  @UseInterceptors(AuthRefreshInterceptor)
+  refresh(
+    @Body() payload: RefreshRequestDto,
+    @Req() request: AuthRequestLike,
+  ): Promise<AuthTokenPairDto> {
+    return this.authCoreService.refresh({
+      refreshToken: this.authSessionService.getRefreshTokenFromRequest(
+        request,
+        payload?.refreshToken,
+      ),
+    });
   }
 
   @Post('logout')
   @HttpCode(HttpStatus.OK)
-  logout(@Body() payload: LogoutRequestDto): Promise<LogoutResponseDto> {
-    return this.authCoreService.logout(payload);
+  @UseInterceptors(AuthLogoutInterceptor)
+  logout(
+    @Body() payload: LogoutRequestDto,
+    @Req() request: AuthRequestLike,
+  ): Promise<LogoutResponseDto> {
+    return this.authCoreService.logout({
+      refreshToken: this.authSessionService.getRefreshTokenFromRequest(
+        request,
+        payload?.refreshToken,
+      ),
+    });
   }
 
   @UseGuards(JwtAuthGuard)

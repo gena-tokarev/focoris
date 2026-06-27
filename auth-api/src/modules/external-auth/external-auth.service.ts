@@ -1,7 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { AuthProvider } from '@prisma/client';
 import { Profile } from 'passport-google-oauth20';
-import type { LoginResponseDto } from '../../core/dto/auth-response.dto';
 import {
   AuthErrorCode,
   AuthErrorResponseDto,
@@ -13,6 +12,7 @@ import { ExternalAuthCodeStore } from './external-auth-code.store';
 import type { ExternalAuthPlatform } from './external-auth.types';
 import { ConfigService } from '@nestjs/config';
 import type { AppEnv } from '../../config/config.validation';
+import type { AuthenticatedSession } from '../session/session.types';
 
 @Injectable()
 export class ExternalAuthService {
@@ -29,7 +29,7 @@ export class ExternalAuthService {
     );
   }
 
-  login(user: IdentityUser): Promise<LoginResponseDto> {
+  login(user: IdentityUser): Promise<AuthenticatedSession> {
     return this.tokenService.login(user);
   }
 
@@ -48,7 +48,7 @@ export class ExternalAuthService {
     );
   }
 
-  async exchangeCompletionCode(code: string): Promise<LoginResponseDto> {
+  async exchangeCompletionCode(code: string): Promise<AuthenticatedSession> {
     const storedCode = await this.externalAuthCodeStore.consume(code);
 
     if (!storedCode) {

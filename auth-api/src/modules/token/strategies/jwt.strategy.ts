@@ -12,8 +12,39 @@ import {
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(configService: ConfigService<AppEnv, true>) {
+    const accessTokenCookieName = configService.getOrThrow(
+      'AUTH_COOKIE_ACCESS_TOKEN_NAME',
+    );
+
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      jwtFromRequest: ExtractJwt.fromExtractors([
+        ExtractJwt.fromAuthHeaderAsBearerToken(),
+        (
+          request?: {
+            headers?: {
+              cookie?: string;
+            };
+          },
+        ) => {
+          const rawCookieHeader = request?.headers?.cookie;
+
+          if (!rawCookieHeader) {
+            return null;
+          }
+
+          for (const cookie of rawCookieHeader.split(';')) {
+            const [rawName, ...valueParts] = cookie.split('=');
+
+            if (rawName?.trim() !== accessTokenCookieName) {
+              continue;
+            }
+
+            return decodeURIComponent(valueParts.join('=').trim());
+          }
+
+          return null;
+        },
+      ]),
       ignoreExpiration: false,
       secretOrKey: configService.getOrThrow('AUTH_ACCESS_TOKEN_SECRET'),
     });

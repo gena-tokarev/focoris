@@ -7,6 +7,18 @@ export const envSchema = z.object({
   AUTH_REFRESH_TOKEN_SECRET: z.string().min(16),
   AUTH_ACCESS_TOKEN_TTL_SECONDS: z.coerce.number().int().positive(),
   AUTH_REFRESH_TOKEN_TTL_SECONDS: z.coerce.number().int().positive(),
+  AUTH_WEB_SESSION_MODE: z.enum(['token', 'cookie']).default('token'),
+  AUTH_COOKIE_ACCESS_TOKEN_NAME: z
+    .string()
+    .min(1)
+    .default('focoris_access_token'),
+  AUTH_COOKIE_REFRESH_TOKEN_NAME: z
+    .string()
+    .min(1)
+    .default('focoris_refresh_token'),
+  AUTH_COOKIE_DOMAIN: z.string().min(1).optional(),
+  AUTH_COOKIE_SECURE: z.coerce.boolean().default(false),
+  AUTH_COOKIE_SAME_SITE: z.enum(['lax', 'strict', 'none']).default('lax'),
   AUTH_EXTERNAL_AUTH_CODE_TTL_SECONDS: z.coerce
     .number()
     .int()

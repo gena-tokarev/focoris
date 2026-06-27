@@ -22,7 +22,6 @@ import type { AppEnv } from '../../config/config.validation';
 import {
   AuthErrorCode,
   type AuthErrorResponseDto,
-  type LoginResponseDto,
 } from '../../core/dto/auth-response.dto';
 import { VerifyEmailCodeDto } from '../../core/dto/verify-email-code.dto';
 import { VerifyMagicLinkDto } from '../../core/dto/verify-magic-link.dto';
@@ -38,6 +37,7 @@ import {
   PasskeyChallengeStore,
   type StoredPasskeyChallenge,
 } from './passkey-challenge.store';
+import type { AuthenticatedSession } from '../session/session.types';
 
 type UserWithPasskeys = Prisma.UserGetPayload<{
   include: {
@@ -86,8 +86,10 @@ export class PasskeyAuthService {
 
   async finishLogin(
     payload: PasskeyFinishRequestDto,
-  ): Promise<LoginResponseDto> {
-    const challenge = await this.passkeyChallengeStore.consume(payload.requestId);
+  ): Promise<AuthenticatedSession> {
+    const challenge = await this.passkeyChallengeStore.consume(
+      payload.requestId,
+    );
 
     if (!challenge || challenge.flow !== PasskeyChallengeFlow.Login) {
       throw this.createInvalidPasskeyRequestError();
@@ -102,14 +104,18 @@ export class PasskeyAuthService {
   async verifyCodeForRegistration(
     payload: VerifyEmailCodeDto,
   ): Promise<PasskeyRegisterStartResponseDto> {
-    const user = await this.emailAuthVerificationService.verifyEmailCode(payload);
+    const user = await this.emailAuthVerificationService.verifyEmailCode(
+      payload,
+    );
     return this.createRegistrationChallenge(user);
   }
 
   async verifyLinkForRegistration(
     payload: VerifyMagicLinkDto,
   ): Promise<PasskeyRegisterStartResponseDto> {
-    const user = await this.emailAuthVerificationService.verifyMagicLink(payload);
+    const user = await this.emailAuthVerificationService.verifyMagicLink(
+      payload,
+    );
     return this.createRegistrationChallenge(user);
   }
 
@@ -122,8 +128,10 @@ export class PasskeyAuthService {
 
   async finishRegistration(
     payload: PasskeyFinishRequestDto,
-  ): Promise<LoginResponseDto> {
-    const challenge = await this.passkeyChallengeStore.consume(payload.requestId);
+  ): Promise<AuthenticatedSession> {
+    const challenge = await this.passkeyChallengeStore.consume(
+      payload.requestId,
+    );
 
     if (
       !challenge ||
@@ -142,7 +150,7 @@ export class PasskeyAuthService {
   private async completeLogin(
     credential: AuthenticationResponseJSON,
     challenge: StoredPasskeyChallenge,
-  ): Promise<LoginResponseDto> {
+  ): Promise<AuthenticatedSession> {
     const storedCredential = await this.prisma.passkeyCredential.findUnique({
       where: { credentialId: credential.id },
       include: {
@@ -185,7 +193,7 @@ export class PasskeyAuthService {
   private async completeRegistration(
     credential: RegistrationResponseJSON,
     challenge: StoredPasskeyChallenge,
-  ): Promise<LoginResponseDto> {
+  ): Promise<AuthenticatedSession> {
     const user = await this.findUserById(challenge.userId!);
 
     const verification = await verifyRegistrationResponse({
@@ -259,7 +267,9 @@ export class PasskeyAuthService {
     return authUser;
   }
 
-  private async ensurePasskeyIdentity(user: IdentityUser): Promise<UserIdentity> {
+  private async ensurePasskeyIdentity(
+    user: IdentityUser,
+  ): Promise<UserIdentity> {
     const existingIdentity = await this.prisma.userIdentity.findUnique({
       where: {
         provider_providerUserId: {
@@ -294,11 +304,13 @@ export class PasskeyAuthService {
       userName: user.email,
       userDisplayName: user.email,
       attestationType: 'none',
-      excludeCredentials: this.getPasskeyCredentials(user).map((credential) => ({
-        id: credential.credentialId,
-        type: 'public-key',
-        transports: this.toAuthenticatorTransports(credential.transports),
-      })),
+      excludeCredentials: this.getPasskeyCredentials(user).map(
+        (credential) => ({
+          id: credential.credentialId,
+          type: 'public-key',
+          transports: this.toAuthenticatorTransports(credential.transports),
+        }),
+      ),
       authenticatorSelection: {
         residentKey: 'preferred',
         userVerification: 'preferred',
@@ -306,8 +318,7 @@ export class PasskeyAuthService {
     });
   }
 
-  private async createAuthenticationOptions(
-  ): Promise<PublicKeyCredentialRequestOptionsJSON> {
+  private async createAuthenticationOptions(): Promise<PublicKeyCredentialRequestOptionsJSON> {
     return generateAuthenticationOptions({
       rpID: this.rpId,
       userVerification: 'preferred',
@@ -335,7 +346,9 @@ export class PasskeyAuthService {
 
   private getPasskeyCredentials(user: UserWithPasskeys): PasskeyCredential[] {
     return user.userIdentities.flatMap((identity) =>
-      identity.provider === AuthProvider.passkey ? identity.passkeyCredentials : [],
+      identity.provider === AuthProvider.passkey
+        ? identity.passkeyCredentials
+        : [],
     );
   }
 
@@ -371,5 +384,4 @@ export class PasskeyAuthService {
       message: 'Invalid or expired passkey request',
     } satisfies AuthErrorResponseDto);
   }
-
 }

@@ -6,15 +6,17 @@ import {
   Query,
   Req,
   Res,
+  UseInterceptors,
   UseGuards,
 } from '@nestjs/common';
-import type { LoginResponseDto } from '../../core/dto/auth-response.dto';
 import type { IdentityUser } from '../identity/identity.types';
 import { GoogleAuthCodeExchangeDto } from './dto/google-auth-code-exchange.dto';
 import type { GoogleAuthStartDto } from './dto/google-auth-start.dto';
 import { ExternalAuthRedirectService } from './external-auth-redirect.service';
 import { ExternalAuthService } from './external-auth.service';
 import { GoogleAuthGuard } from './google/google-auth.guard';
+import { AuthSessionInterceptor } from '../session/interceptors/auth-session.interceptor';
+import type { AuthenticatedSession } from '../session/session.types';
 
 interface RedirectResponse {
   redirect(url: string): void;
@@ -75,9 +77,10 @@ export class ExternalAuthController {
   }
 
   @Post('google/exchange')
+  @UseInterceptors(AuthSessionInterceptor)
   exchangeGoogleCode(
     @Body() payload: GoogleAuthCodeExchangeDto,
-  ): Promise<LoginResponseDto> {
+  ): Promise<AuthenticatedSession> {
     return this.externalAuthService.exchangeCompletionCode(payload.code);
   }
 

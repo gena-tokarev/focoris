@@ -29,18 +29,25 @@ module.exports = async function () {
     ? Number(process.env.AUTH_API_PORT)
     : 3001;
   let postgresContainerId: string | undefined;
+  let redisContainerId: string | undefined;
 
   if (existsSync(E2E_RUNTIME_PATH)) {
     const runtime = JSON.parse(readFileSync(E2E_RUNTIME_PATH, 'utf8')) as {
       postgresContainerId?: string;
+      redisContainerId?: string;
     };
     postgresContainerId = runtime.postgresContainerId;
+    redisContainerId = runtime.redisContainerId;
   }
 
   await killPort(port);
 
   if (postgresContainerId) {
     await runCommand('docker', ['rm', '-f', postgresContainerId]);
+  }
+
+  if (redisContainerId) {
+    await runCommand('docker', ['rm', '-f', redisContainerId]);
   }
 
   rmSync(E2E_RUNTIME_PATH, { force: true });

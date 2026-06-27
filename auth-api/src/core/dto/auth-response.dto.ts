@@ -14,14 +14,18 @@ export interface AuthTokenPairDto {
   expiresInSeconds: number;
 }
 
+export type AuthSessionMode = 'token' | 'cookie';
+
 export interface LoginResponseDto {
   user: AuthUserDto;
-  tokens: AuthTokenPairDto;
+  sessionMode: AuthSessionMode;
+  tokens?: AuthTokenPairDto;
 }
 
 export interface RegisterResponseDto {
   user: AuthUserDto;
-  tokens: AuthTokenPairDto;
+  sessionMode: AuthSessionMode;
+  tokens?: AuthTokenPairDto;
 }
 
 export interface RequestEmailLoginResponseDto {
@@ -35,7 +39,8 @@ export interface RequestEmailLoginResponseDto {
 }
 
 export interface RefreshResponseDto {
-  tokens: AuthTokenPairDto;
+  sessionMode: AuthSessionMode;
+  tokens?: AuthTokenPairDto;
 }
 
 export interface LogoutResponseDto {

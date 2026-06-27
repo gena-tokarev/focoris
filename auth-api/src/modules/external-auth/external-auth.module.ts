@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { PassportModule } from '@nestjs/passport';
 import { IdentityModule } from '../identity/identity.module';
+import { SessionModule } from '../session/session.module';
 import { TokenModule } from '../token/token.module';
 import { ExternalAuthCodeStore } from './external-auth-code.store';
 import { ExternalAuthController } from './external-auth.controller';
@@ -10,7 +11,7 @@ import { GoogleAuthGuard } from './google/google-auth.guard';
 import { GoogleStrategy } from './google/google.strategy';
 
 @Module({
-  imports: [PassportModule, IdentityModule, TokenModule],
+  imports: [PassportModule, IdentityModule, SessionModule, TokenModule],
   controllers: [ExternalAuthController],
   providers: [
     ExternalAuthService,

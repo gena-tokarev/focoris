@@ -1,16 +1,22 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
+import { AuthProvider } from '@prisma/client';
+import * as bcrypt from 'bcryptjs';
 import { createHash, randomBytes, randomInt } from 'crypto';
 import { IdentityService } from '../identity/identity.service';
+import type { IdentityUser } from '../identity/identity.types';
 import { TokenService } from '../token/token.service';
+import { RegisterRequestDto } from '../../core/dto/register-request.dto';
 import { RequestEmailLoginDto } from '../../core/dto/request-email-login.dto';
 import { VerifyEmailCodeDto } from '../../core/dto/verify-email-code.dto';
 import { VerifyMagicLinkDto } from '../../core/dto/verify-magic-link.dto';
 import {
-  LoginResponseDto,
+  AuthErrorCode,
+  AuthErrorResponseDto,
   RequestEmailLoginResponseDto,
 } from '../../core/dto/auth-response.dto';
 import { EmailLoginChallengeStore } from './email-login-challenge.store';
 import { EmailAuthVerificationService } from './email-auth-verification.service';
+import type { AuthenticatedSession } from '../session/session.types';
 
 @Injectable()
 export class EmailAuthService {
@@ -55,17 +61,55 @@ export class EmailAuthService {
     };
   }
 
+  async register(payload: RegisterRequestDto): Promise<AuthenticatedSession> {
+    const email = this.identityService.normalizeEmail(payload.email);
+    const existingLocalUser = await this.identityService.findUserByIdentity(
+      AuthProvider.local,
+      email,
+    );
+
+    if (existingLocalUser) {
+      throw new ConflictException({
+        statusCode: 409,
+        code: AuthErrorCode.EmailAlreadyTaken,
+        message: 'Email is already taken',
+      } satisfies AuthErrorResponseDto);
+    }
+
+    const passwordHash = bcrypt.hashSync(payload.password, 10);
+    const user = await this.identityService.createUserWithIdentity({
+      email,
+      identity: {
+        provider: AuthProvider.local,
+        providerUserId: email,
+        email,
+        emailVerified: false,
+        passwordHash,
+      },
+    });
+
+    return this.tokenService.login(user);
+  }
+
+  login(user: IdentityUser): Promise<AuthenticatedSession> {
+    return this.tokenService.login(user);
+  }
+
   async verifyEmailCode(
     payload: VerifyEmailCodeDto,
-  ): Promise<LoginResponseDto> {
-    const user = await this.emailAuthVerificationService.verifyEmailCode(payload);
+  ): Promise<AuthenticatedSession> {
+    const user = await this.emailAuthVerificationService.verifyEmailCode(
+      payload,
+    );
     return this.tokenService.login(user);
   }
 
   async verifyMagicLink(
     payload: VerifyMagicLinkDto,
-  ): Promise<LoginResponseDto> {
-    const user = await this.emailAuthVerificationService.verifyMagicLink(payload);
+  ): Promise<AuthenticatedSession> {
+    const user = await this.emailAuthVerificationService.verifyMagicLink(
+      payload,
+    );
     return this.tokenService.login(user);
   }
 

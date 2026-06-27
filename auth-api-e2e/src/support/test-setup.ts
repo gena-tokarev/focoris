@@ -10,9 +10,13 @@ module.exports = async function () {
   if (existsSync(runtimePath)) {
     const runtime = JSON.parse(readFileSync(runtimePath, 'utf8')) as {
       databaseUrl?: string;
+      redisUrl?: string;
     };
     if (runtime.databaseUrl) {
       process.env.DATABASE_URL = runtime.databaseUrl;
+    }
+    if (runtime.redisUrl) {
+      process.env.REDIS_URL = runtime.redisUrl;
     }
   }
 
